@@ -31,7 +31,7 @@ index = build_index(docs)
 # - See the detail with `?plot`
 pl = plot(index;
     title = "City of Austin Community Survey Themes",
-    labeler_kwargs = (; model = "gpt3t",))
+    labeler_kwargs = (; model = "gpt3t"))
 pl
 
 # Voila! We have an interactive explorer of the main themes in the survey in less than 2 minutes and for a few cents!
@@ -40,7 +40,7 @@ pl
 #
 # One of the biggest superpowers of LLMs, is that you can zoom in/out in the abstraction level to help you digest information more gradually.
 # For example, we can start by looking at the top-level themes with `k=4`:
-pl4 = plot(index; k = 4, labeler_kwargs = (; model = "gpt3t",))
+pl4 = plot(index; k = 4, labeler_kwargs = (; model = "gpt3t"))
 pl4
 
 # Now, we have both the top-level themes and the sub-themes available in `index.topic_levels`, so we can easily switch between them.

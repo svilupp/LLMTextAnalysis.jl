@@ -20,12 +20,12 @@ metadata = build_topic(index, assignments, 1)
 ```
 """
 function build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
-        topic_level::Int = nunique(assignments),
-        verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
-        label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
-        summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
-        num_samples::Int = 8, num_keywords::Int = 10,
-        cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
+    topic_level::Int = nunique(assignments),
+    verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
+    label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
+    summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
+    num_samples::Int = 8, num_keywords::Int = 10,
+    cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
     @assert topic_idx ∈ assignments "Topic index $topic_idx not found in assignments!"
     @assert !isnothing(label_template)||!add_label "No label template provided!"
     @assert !isnothing(summary_template)||!add_summary "No summary template provided!"
@@ -134,10 +134,10 @@ clustered_index = build_clusters!(index, k=2)
 ```
 """
 function build_clusters!(index::AbstractDocumentIndex; k::Union{Int, Nothing} = nothing,
-        h::Union{Float64, Nothing} = nothing,
-        verbose::Bool = true, add_label::Bool = true, add_summary::Bool = false,
-        labeler_kwargs::NamedTuple = NamedTuple(),
-        cluster_kwargs...)
+    h::Union{Float64, Nothing} = nothing,
+    verbose::Bool = true, add_label::Bool = true, add_summary::Bool = false,
+    labeler_kwargs::NamedTuple = NamedTuple(),
+    cluster_kwargs...)
     if isnothing(index.clustering)
         verbose && @info "Building hierarchical clusters..."
         index.clustering = hclust(index.distances; linkage = :complete, cluster_kwargs...)

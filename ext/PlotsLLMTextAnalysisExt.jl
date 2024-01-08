@@ -24,9 +24,9 @@ pl = StatsPlots.plot(index)
 ```
 """
 function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
-        k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
-        add_hover::Bool = true, cluster_kwargs::NamedTuple = NamedTuple(),
-        labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
+    k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
+    add_hover::Bool = true, cluster_kwargs::NamedTuple = NamedTuple(),
+    labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
     ## prepare plot
     prepare_plot!(index; verbose)
     ## Prepare a clustering

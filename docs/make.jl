@@ -25,8 +25,8 @@ makedocs(;
         ],
         "F.A.Q." => "FAQ.md",
         "References" => "api_reference.md",
-    ],)
+    ])
 
 deploydocs(;
     repo = "github.com/svilupp/LLMTextAnalysis.jl",
-    devbranch = "main",)
+    devbranch = "main")

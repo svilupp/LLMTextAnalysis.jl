@@ -1,14 +1,18 @@
 """
-    build_keywords(docs::Vector{<:AbstractString}, return_type::Type=String; min_length::Int=2, stopwords::Vector{String}=stopwords(Languages.English()), stemmer_language::Union{Nothing, String}="english") -> (SparseMatrixCSC{Float32,Int}, Vector{<:AbstractString})
+    build_keywords(docs::Vector{<:AbstractString},
+        return_type::Type = String;
+        min_length::Int = 2,
+        stopwords::Vector{String} = stopwords(Languages.English()),
+        stemmer_language::Union{Nothing, String} = "english")
 
 Extracts and returns keywords from a collection of documents.
 
 # Arguments
-- `docs`: Collection of documents from which to extract keywords.
-- `return_type`: Type of the returned keywords.
-- `min_length`: Minimum length of keywords to consider.
-- `stopwords`: List of stopwords to exclude from keyword extraction.
-- `stemmer_language`: Language for stemming, if applicable.
+- `docs`: Collection of documents from which to extract keywords. If you have only one large document, consider splitting it into smaller chunks with `PromptingTools.split_by_length`.
+- `return_type`: Element type of the returned keywords. Defaults to String.
+- `min_length`: Minimum length of keywords to consider. Will be dropped if they are shorter than this.
+- `stopwords`: List of stopwords to exclude from keyword extraction. Defaults to English stopwords (`stopwords(Languages.English())`).
+- `stemmer_language`: Language for stemming, if applicable. Set to `nothing` to disable stemming.
 
 # Returns
 - A sparse matrix where each column represents a document and each row a keyword, weighted by its frequency.
@@ -67,16 +71,18 @@ function build_keywords(docs::Vector{<:AbstractString},
 end
 
 """
-    build_index(docs::Vector{<:AbstractString}; verbose::Bool=true, index_id::Symbol=gensym("DocIndex"), aiembed_kwargs::NamedTuple=NamedTuple(), keyword_kwargs::NamedTuple=NamedTuple(), kwargs...) -> DocIndex
+    build_index(docs::Vector{<:AbstractString}; verbose::Bool = true,
+    index_id::Symbol = gensym("DocIndex"), aiembed_kwargs::NamedTuple = NamedTuple(),
+    keyword_kwargs::NamedTuple = NamedTuple(), kwargs...)
 
 Builds an index of the given documents, including their embeddings and extracted keywords.
 
 # Arguments
-- `docs`: Collection of documents to index.
-- `verbose`: Flag to enable verbose output.
-- `index_id`: Identifier for the document index.
-- `aiembed_kwargs`: Additional arguments for AI embedding.
-- `keyword_kwargs`: Additional arguments for keyword extraction.
+- `docs`: Collection of documents to index. If you have only one large document, consider splitting it into smaller chunks with `PromptingTools.split_by_length`.
+- `verbose`: Flag to enable INFO logging.
+- `index_id`: Identifier for the document index. Useful if there will be multiple indices.
+- `aiembed_kwargs`: Additional arguments for `PromptingTools.aiembed`. See `?aiembed` for more details.
+- `keyword_kwargs`: Additional arguments for keyword extraction. See `?build_keywords` for more details.
 
 # Returns
 - An instance of `DocIndex` containing information about the documents, embeddings, keywords, etc.
@@ -126,15 +132,13 @@ end
 ## Prepare for plotting
 # TODO: allow some quick hacks to scale when there are >1M documents (eg, avoid UMAP because it's the slowest step)
 """
-    prepare_plot!(index::AbstractDocumentIndex; verbose
-
-::Bool=true, kwargs...) -> AbstractDocumentIndex
+    prepare_plot!(index::AbstractDocumentIndex; verbose::Bool=true, kwargs...) -> AbstractDocumentIndex
 
 Prepares the 2D UMAP plot data for a given document index.
 
 # Arguments
 - `index`: The document index to prepare plot data for.
-- `verbose`: Flag to enable verbose output.
+- `verbose`: Flag to enable INFO logging.
 
 # Returns
 - The updated index with `plot_data` field populated.
