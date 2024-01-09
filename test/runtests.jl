@@ -1,7 +1,6 @@
 using LLMTextAnalysis
 using PromptingTools
 const PT = PromptingTools
-using HTTP, JSON3
 using Test
 using Aqua
 
@@ -13,6 +12,6 @@ end
     include("utils.jl")
     include("types.jl")
     include("preparation.jl")
-    # include("topic_modelling.jl")
+    include("topic_modelling.jl")
     # include("concept_labelling.jl")
 end

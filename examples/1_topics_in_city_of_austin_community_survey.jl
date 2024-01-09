@@ -7,8 +7,9 @@ using Downloads, CSV, DataFrames
 using Plots
 using LLMTextAnalysis
 ##PLOTLYJS##
-plotlyjs() # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
+plotlyjs(); # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
 
+# ## Prepare the data
 # Download the survey data
 Downloads.download("https://data.austintexas.gov/api/views/s2py-ceb7/rows.csv?accessType=DOWNLOAD",
     joinpath(@__DIR__, "cityofaustin.csv"));
@@ -20,6 +21,7 @@ df = CSV.read(joinpath(@__DIR__, "cityofaustin.csv"), DataFrame);
 col = "Q25 - If there was one thing you could share with the Mayor regarding the City of Austin (any comment, suggestion, etc.), what would it be?"
 docs = df[!, col] |> skipmissing |> collect;
 
+# ## Topic Analysis
 # Index the documents (ie, embed them)
 index = build_index(docs)
 
@@ -35,6 +37,8 @@ pl = plot(index;
 pl
 
 # Voila! We have an interactive explorer of the main themes in the survey in less than 2 minutes and for a few cents!
+
+# If you do not want to create any plots, simply call `build_clusters!(index; k)` and explore the generated topics in `index.topic_levels[k]` where `k` is the number of topics.
 
 # ## Tip 1: Zoom in/out on the Information
 #

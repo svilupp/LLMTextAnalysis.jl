@@ -1,6 +1,5 @@
 using LLMTextAnalysis: build_keywords
 using PromptingTools: TestEchoOpenAISchema
-using PromptingTools.JSON3
 
 @testset "build_keywords" begin
     # Basic Input: Test with simple input documents
@@ -41,7 +40,6 @@ end
         schema = TestEchoOpenAISchema(; response = response1, status = 200))
     docs = ["Document 1 text", "Document 2 text"]
     index = build_index(docs; aiembed_kwargs = (; model = "mock-emb"))
-    index.embeddings
     @test isa(index, DocIndex)
     @test length(index.docs) == length(docs)
     @test size(index.embeddings, 2) == length(docs)
@@ -66,6 +64,9 @@ end
     custom_id = :CustomIndexID
     index = build_index(docs, index_id = custom_id, aiembed_kwargs = (; model = "mock-emb"))
     @test index.id == custom_id
+
+    ## Clean up
+    haskey(PT.MODEL_REGISTRY, "mock-emb") && delete!(PT.MODEL_REGISTRY, "mock-emb")
 end
 
 @testset "prepare_plot!" begin

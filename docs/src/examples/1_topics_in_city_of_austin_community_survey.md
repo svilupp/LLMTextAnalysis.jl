@@ -13,13 +13,10 @@ using Downloads, CSV, DataFrames
 using Plots
 using LLMTextAnalysis
 import PlotlyJS, PlotlyDocumenter
-plotlyjs() # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
+plotlyjs(); # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
 ````
 
-````
-Plots.PlotlyJSBackend()
-````
-
+## Prepare the data
 Download the survey data
 
 ````julia
@@ -40,6 +37,7 @@ col = "Q25 - If there was one thing you could share with the Mayor regarding the
 docs = df[!, col] |> skipmissing |> collect;
 ````
 
+## Topic Analysis
 Index the documents (ie, embed them)
 
 ````julia
@@ -81,6 +79,8 @@ pl = plot(index;
 ```
 
 Voila! We have an interactive explorer of the main themes in the survey in less than 2 minutes and for a few cents!
+
+If you do not want to create any plots, simply call `build_clusters!(index; k)` and explore the generated topics in `index.topic_levels[k]` where `k` is the number of topics.
 
 ## Tip 1: Zoom in/out on the Information
 

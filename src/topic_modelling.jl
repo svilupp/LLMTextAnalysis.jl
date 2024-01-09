@@ -56,7 +56,7 @@ function build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, top
     docs_masked = @view(docs[mask])
 
     # Extract top_k keywords
-    if num_keywords > 0
+    if num_keywords > 0 && !isempty(keywords_ids)
         sum_weights = sum(keywords_ids, dims = 2) |> vec
         keywords_idx = first(sortperm(sum_weights, rev = true), num_keywords)
         keywords = join(@view(keywords_vocab[keywords_idx]), ", ")

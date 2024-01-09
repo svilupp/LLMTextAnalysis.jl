@@ -118,7 +118,7 @@ function build_index(docs::Vector{<:AbstractString}; verbose::Bool = true,
     embeddings = hcat(embeddings...) .|> Float32 # flatten, columns are documents
     verbose && @info "Done embedding. Total cost: \$$(round(cost_tracker[],digits=3))"
     verbose && @info "Computing pairwise distances..."
-    distances = pairwise(CosineDist(), embeddings)
+    distances = pairwise(CosineDist(), embeddings; dims = 2)
     verbose && @info "Extracting keywords..."
     keywords_ids, keywords_vocab = build_keywords(docs; keyword_kwargs...)
     return DocIndex(;
