@@ -1,83 +1,95 @@
+using LLMTextAnalysis: build_keywords
+using PromptingTools: TestEchoOpenAISchema
+using PromptingTools.JSON3
+
 @testset "build_keywords" begin
     # Basic Input: Test with simple input documents
-    docs = ["This is a sample document.", "Another sample document."]
+    docs = ["This is a sample document.", "Another sample document.", "x"]
     keywords_ids, keywords_vocab = build_keywords(docs)
-    @test isa(keywords_ids, SparseMatrixCSC)
-    @test isa(keywords_vocab, Vector)
+    @test keywords_vocab == ["document", "sampl"]
+    @test keywords_ids |> Matrix == hcat(0.5ones(2, 2), zeros(2, 1))
 
     # No Documents: Ensure it throws an error for empty document list
-    docs = []
+    docs = String[]
     @test_throws AssertionError build_keywords(docs)
 
     # Custom Stopwords: Test keyword extraction with custom stopwords
     docs = ["A simple example with custom stopwords."]
-    custom_stopwords = ["with", "a", "the"]
+    custom_stopwords = ["with", "a", "the", "custom"]
     _, keywords_vocab = build_keywords(docs, stopwords = custom_stopwords)
     @test all(!in(Set(custom_stopwords)), keywords_vocab)
 
     # Minimum Length Constraint: Test keyword extraction with minimum word length
-    docs = ["Short and long words"]
-    min_length = 5
-    _, keywords_vocab = build_keywords(docs, min_length = min_length)
+    docs = ["short and long words with supercalifragilisticexpialidocious"]
+    min_length = 6
+    _, keywords_vocab = build_keywords(docs; min_length)
     @test all(length(word) >= min_length for word in keywords_vocab)
 
     # Different Return Type: Test with Symbol as return type for keywords
     docs = ["Testing different return type."]
-    keywords_ids, _ = build_keywords(docs, return_type = Symbol)
-    @test all(x -> isa(x, Symbol), nonzeros(keywords_ids))
+    _, keywords_vocab = build_keywords(docs, SubString{String})
+    @test all(x -> isa(x, SubString{String}), keywords_vocab)
 end
 
 @testset "build_index" begin
     # Basic Functionality: Test with simple input documents
+    # corresponds to OpenAI API v1
+    response1 = Dict(:data => [Dict(:embedding => ones(128)), Dict(:embedding => ones(128))],
+        :usage => Dict(:total_tokens => 2, :prompt_tokens => 2, :completion_tokens => 0))
+    PT.register_model!(;
+        name = "mock-emb",
+        schema = TestEchoOpenAISchema(; response = response1, status = 200))
     docs = ["Document 1 text", "Document 2 text"]
-    index = build_index(docs)
+    index = build_index(docs; aiembed_kwargs = (; model = "mock-emb"))
+    index.embeddings
     @test isa(index, DocIndex)
     @test length(index.docs) == length(docs)
     @test size(index.embeddings, 2) == length(docs)
+    @test eltype(index.embeddings) == Float32
+    @test index.distances == zeros(2, 2)
+    @test index.keywords_ids == 0.5ones(2, 2)
+    @test index.keywords_vocab == ["document", "text"]
 
     # No Documents: Ensure it throws an error for empty document list
-    docs = []
+    docs = String[]
     @test_throws AssertionError build_index(docs)
 
     # Verbose Flag: Test with verbose flag enabled
     docs = ["Document 1 text", "Document 2 text"]
-    index = build_index(docs, verbose = true)
-    @test isa(index, DocIndex)
+    index = build_index(docs, verbose = true, aiembed_kwargs = (; model = "mock-emb"))
+    @test_logs (:info, r"Embedding 2 documents") (:info, r"Done embedding.") (:info,
+        r"Computing pairwise distances") (:info, r"Extracting keywords") match_mode=:any build_index(docs,
+        verbose = true,
+        aiembed_kwargs = (; model = "mock-emb"))
 
     # Custom Index ID: Test with a custom index ID
     custom_id = :CustomIndexID
-    index = build_index(docs, index_id = custom_id)
+    index = build_index(docs, index_id = custom_id, aiembed_kwargs = (; model = "mock-emb"))
     @test index.id == custom_id
-
-    # AI Embedding Mock: Ignore AI embedding calls with a mock
-    # (Assuming a suitable mock function or data is provided)
-    mock_embeddings = rand(Float32, (10, 2))
-    mock_aiembed = (; docs...) -> mock_embeddings
-    index = build_index(docs, aiembed_kwargs = (model = mock_aiembed,))
-    @test size(index.embeddings) == size(mock_embeddings)
 end
 
 @testset "prepare_plot!" begin
     # Basic Functionality: Test plot preparation on a simple document index
-    docs = ["Document 1 text", "Document 2 text"]
-    index = build_index(docs)
-    prepared_index = prepare_plot!(index)
-    @test isa(prepared_index, AbstractDocumentIndex)
+    docs = ["Document 1 text", "Document 2 text", "Document 3 text", "Document 4 text"]
+    embeddings = ones(Float32, (10, 4))
+    distances = zeros(Float32, (4, 4))
+    index = DocIndex(; docs, embeddings, distances)
+    @test index.plot_data == nothing
+    prepared_index = prepare_plot!(index; n_neighbors = 1)
+    @test index === prepared_index
     @test !isnothing(prepared_index.plot_data)
-    @test size(prepared_index.plot_data, 1) == 2  # UMAP should reduce to 2 dimensions
+    @test size(prepared_index.plot_data) == (2, length(docs))  # UMAP should reduce to 2 dimensions
 
     # Verbose Flag: Test with verbose flag enabled
-    prepared_index_verbose = prepare_plot!(index, verbose = true)
-    @test isa(prepared_index_verbose, AbstractDocumentIndex)
-    @test !isnothing(prepared_index_verbose.plot_data)
+    index = DocIndex(; docs, embeddings, distances)
+    @test_logs (:info, r"Computing UMAP") match_mode=:any prepare_plot!(index,
+        n_neighbors = 1,
+        verbose = true)
+    @test !isnothing(index.plot_data)
 
     # Repeated Calls: Ensure repeated calls do not change plot data
-    repeated_prepared_index = prepare_plot!(index)
-    @test prepared_index.plot_data == repeated_prepared_index.plot_data
-
-    # Plot Data Already Exists: Test when plot data is pre-generated
-    mock_plot_data = rand(Float32, (2, length(docs)))
-    index.plot_data = mock_plot_data
-    prepared_index_with_data = prepare_plot!(index)
-    @test prepared_index_with_data.plot_data == mock_plot_data
+    plot_data = index.plot_data |> copy
+    prepare_plot!(index; n_neighbors = 1)
+    prepare_plot!(index; n_neighbors = 1)
+    @test index.plot_data == plot_data
 end

@@ -13,17 +13,16 @@ A struct representing the metadata of a specific topic extracted from a collecti
 - `index_id::Symbol`: Identifier for the topic.
 - `topic_level::Int`: The level of the topic in the hierarchy.
 - `topic_idx::Int`: Index of the topic.
-- `label::AbstractString`: Human-readable label of the topic.
-- `summary::AbstractString`: Brief summary of the topic.
-- `docs_idx::Vector{Int}`: Indices of documents belonging to this topic.
-- `center_doc_idx::Int`: Index of the central document in this topic.
-- `samples_doc_idx::Vector{Int}`: Indices of representative documents.
-- `keywords_idx::Vector{Int}`: Indices of specific keywords associated with this topic.
+- `label::AbstractString`: Human-readable label of the topic. Defaults to `""`.
+- `summary::AbstractString`: Brief summary of the topic. Defaults to `""`.
+- `docs_idx::Vector{Int}`: Indices of documents belonging to this topic. Corresponds to positions in `index.docs`.
+- `center_doc_idx::Int`: Index of the central document in this topic. Corresponds to a position in `docs_idx` (not index!)
+- `samples_doc_idx::Vector{Int}`: Indices of representative documents. Corresponds to positions in `docs_idx` (not index!)
+- `keywords_idx::Vector{Int}`: Indices of specific keywords associated with this topic. Corresponds to positions in `index.keywords_vocab`.
 
 # Example
 ```julia
-metadata = TopicMetadata(topic_level=1, topic_idx=5)
-println(metadata)
+topic = TopicMetadata(topic_level=1, topic_idx=5)
 ```
 """
 @kwdef mutable struct TopicMetadata <: AbstractTopicMetadata
@@ -52,19 +51,18 @@ A struct for maintaining an index of documents, their embeddings, and related in
 # Fields
 - `id::Symbol`: Unique identifier for the document index.
 - `docs::Vector{T1}`: Collection of documents.
-- `embeddings::Matrix{Float32}`: Embeddings of the documents.
-- `distances::Matrix{Float32}`: Pairwise distances between document embeddings.
-- `keywords_ids::T2`: Sparse matrix representing keywords in documents.
+- `embeddings::Matrix{Float32}`: Embeddings of the documents. Documents are columns.
+- `distances::Matrix{Float32}`: Pairwise distances between document embeddings. Documents are columns.
+- `keywords_ids::T2`: Sparse matrix representing keywords in documents. Keywords in `keywords_vocab` are rows, documents are columns.
 - `keywords_vocab::Vector{<:AbstractString}`: Vocabulary of keywords.
-- `plot_data::Union{Nothing, Matrix{Float32}}`: 2D embedding data for plotting.
+- `plot_data::Union{Nothing, Matrix{Float32}}`: 2D embedding data for plotting. Rows are dimensions, columns are documents.
 - `clustering::Any`: Results of clustering the documents.
-- `topic_levels::Dict{Int, Vector{TopicMetadata}}`: Metadata for topics at different levels.
+- `topic_levels::Dict{Int, Vector{TopicMetadata}}`: Metadata for topics at different levels. Indexed by `k` = number of topics.
 
 # Example
 ```julia
 docs = ["Document 1 text", "Document 2 text"]
 index = DocIndex(docs=docs, embeddings=rand(Float32, (10, 2)), distances=rand(Float32, (2, 2)))
-println(index)
 ```
 """
 @kwdef mutable struct DocIndex{T1 <: AbstractString, T2 <: AbstractMatrix} <:

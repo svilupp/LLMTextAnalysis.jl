@@ -12,7 +12,7 @@ end
 @testset "LLMTextAnalysis.jl" begin
     include("utils.jl")
     include("types.jl")
-    # include("preparation.jl")
+    include("preparation.jl")
     # include("topic_modelling.jl")
     # include("concept_labelling.jl")
 end

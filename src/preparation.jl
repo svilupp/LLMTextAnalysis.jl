@@ -46,7 +46,8 @@ function build_keywords(docs::Vector{<:AbstractString},
     end
     ## apply stemmer
     keywords = map(x -> Snowball.stem.(Ref(stmr), x), keywords)
-    keywords_vocab = unique(vcat(keywords...)) |> sort
+    keywords_vocab = unique(vcat(keywords...)) |> sort |>
+                     x -> convert(Vector{return_type}, x)
     keywords_dict = Dict(keywords_vocab .=> 1:length(keywords_vocab))
 
     # Build sparse matrix of keywords

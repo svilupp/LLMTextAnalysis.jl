@@ -1,5 +1,11 @@
 """
-    build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int; topic_level::Int=nunique(assignments), verbose::Bool=false, add_label::Bool=true, add_summary::Bool=false, label_template::Union{Nothing, Symbol}=:TopicLabelerBasic, summary_template::Union{Nothing, Symbol}=:TopicSummarizerBasic, num_samples::Int=8, num_keywords::Int=10, cost_tracker::Union{Nothing, Threads.Atomic{Float64}}=nothing, aikwargs...) -> TopicMetadata
+    build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
+    topic_level::Int = nunique(assignments),
+    verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
+    label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
+    summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
+    num_samples::Int = 8, num_keywords::Int = 10,
+    cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
 
 Builds the metadata for a specific topic in the document index.
 
@@ -7,7 +13,18 @@ Builds the metadata for a specific topic in the document index.
 - `index`: The document index.
 - `assignments`: Vector of topic assignments for each document.
 - `topic_idx`: Index of the topic to build metadata for.
-- Additional arguments for configuring the metadata.
+
+# Keyword Arguments
+- `topic_level`: The level of the topic in the hierarchy. Corresponds to `k` in `build_clusters!`.
+- `verbose`: Flag to enable INFO logging.
+- `add_label`: Flag to enable topic labeling, ie, call LLM to generate topic label.
+- `add_summary`: Flag to enable topic summarization, ie, call LLM to generate topic summary.
+- `label_template`: The LLM template to use for topic labeling. See `?aitemplates` for more details on templates.
+- `summary_template`: The LLM template to use for topic summarization. See `?aitemplates` for more details on templates.
+- `num_samples`: Number of diverse samples to show to the LLM for each topic.
+- `num_keywords`: Number of top keywords to show to the LLM for each topic.
+- `cost_tracker`: An `Atomic` to track the cost of the LLM calls, if we trigger multiple calls asynchronously.
+
 
 # Returns
 - `TopicMetadata` instance for the specified topic.
@@ -20,12 +37,12 @@ metadata = build_topic(index, assignments, 1)
 ```
 """
 function build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
-    topic_level::Int = nunique(assignments),
-    verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
-    label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
-    summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
-    num_samples::Int = 8, num_keywords::Int = 10,
-    cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
+        topic_level::Int = nunique(assignments),
+        verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
+        label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
+        summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
+        num_samples::Int = 8, num_keywords::Int = 10,
+        cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
     @assert topic_idx ∈ assignments "Topic index $topic_idx not found in assignments!"
     @assert !isnothing(label_template)||!add_label "No label template provided!"
     @assert !isnothing(summary_template)||!add_summary "No summary template provided!"
@@ -114,15 +131,24 @@ end
 ## Clustering
 
 """
-    build_clusters!(index::AbstractDocumentIndex; k::Union{Int,Nothing}=nothing, h::Union{Float64,Nothing}=nothing, verbose::Bool=true, add_label::Bool=true, add_summary::Bool=false, labeler_kwargs::NamedTuple=NamedTuple(), cluster_kwargs...) -> AbstractDocumentIndex
+    build_clusters!(index::AbstractDocumentIndex; k::Union{Int, Nothing} = nothing,
+        h::Union{Float64, Nothing} = nothing,
+        verbose::Bool = true, add_label::Bool = true, add_summary::Bool = false,
+        labeler_kwargs::NamedTuple = NamedTuple(),
+        cluster_kwargs...)
 
 Performs clustering on the document index and builds topics at different levels.
 
 # Arguments
 - `index`: The document index.
 - `k`: Number of clusters to cut at.
-- `h`: Height to cut the dendrogram at.
-- Additional arguments for clustering and labeling.
+- `h`: Height to cut the dendrogram at. See `?Clustering.hclust` for more details.
+- `verbose`: Flag to enable INFO logging.
+- `add_label`: Flag to enable topic labeling, ie, call LLM to generate topic label.
+- `add_summary`: Flag to enable topic summarization, ie, call LLM to generate topic summary.
+- `labeler_kwargs`: Keyword arguments to pass to the LLM labeler. See `?build_topic` for more details on available arguments.
+- `cluster_kwargs`: All remaining arguments will be passed to `Clustering.hclust`. See `?Clustering.hclust` for more details on available arguments.
+
 
 # Returns
 - The updated index with clustering information and topic metadata.
@@ -134,10 +160,10 @@ clustered_index = build_clusters!(index, k=2)
 ```
 """
 function build_clusters!(index::AbstractDocumentIndex; k::Union{Int, Nothing} = nothing,
-    h::Union{Float64, Nothing} = nothing,
-    verbose::Bool = true, add_label::Bool = true, add_summary::Bool = false,
-    labeler_kwargs::NamedTuple = NamedTuple(),
-    cluster_kwargs...)
+        h::Union{Float64, Nothing} = nothing,
+        verbose::Bool = true, add_label::Bool = true, add_summary::Bool = false,
+        labeler_kwargs::NamedTuple = NamedTuple(),
+        cluster_kwargs...)
     if isnothing(index.clustering)
         verbose && @info "Building hierarchical clusters..."
         index.clustering = hclust(index.distances; linkage = :complete, cluster_kwargs...)
