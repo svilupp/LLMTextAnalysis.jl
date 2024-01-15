@@ -103,6 +103,54 @@ function Base.show(io::IO, index::DocIndex)
         "(Documents: $(length(index.docs)), PlotData: $plot_data_str, Topic Levels: $topic_levels_str)")
 end
 
+## Concept Labeling
+# TODO: add documentation
+@kwdef mutable struct TrainedConcept
+    index_id::Symbol # source index
+    # required, list of source document positions in index
+    source_doc_ids::Vector{Int}
+    # what concept we're training
+    concept::String
+    # generate docs - first for spectrum1, then spectrum2, ie, 2x length(source_doc_ids)
+    docs::Union{Vector{<:AbstractString}, Nothing} = nothing
+    # embeddings of the generated docs: (embedding_size, num_docs)
+    embeddings::Union{Matrix{Float32}, Nothing} = nothing
+    coeffs::Union{Vector{Float32}, Nothing} = nothing
+end
+@kwdef mutable struct TrainedSpectrum
+    index_id::Symbol # source index
+    # required, list of source document positions in index
+    source_doc_ids::Vector{Int}
+    # required, spectrum1 and spectrum2 lenses to rewrite the text in
+    spectrum::Tuple{String, String}
+    # generate docs - first for spectrum1, then spectrum2, ie, 2x length(source_doc_ids)
+    docs::Union{Vector{<:AbstractString}, Nothing} = nothing
+    # embeddings of the generated docs: (embedding_size, num_docs)
+    embeddings::Union{Matrix{Float32}, Nothing} = nothing
+    coeffs::Union{Vector{Float32}, Nothing} = nothing
+end
+
+function Base.show(io::IO, obj::TrainedConcept)
+    (; concept, docs, embeddings, coeffs) = obj
+    docs_str = isnothing(docs) ? "-" : "$(length(docs))"
+    embeddings_str = isnothing(embeddings) ? "-" : "OK"
+    coefficients_str = isnothing(coeffs) ? "-" : "OK"
+
+    print(io,
+        nameof(typeof(obj)),
+        "(Concept: \"$(concept)\", Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
+end
+function Base.show(io::IO, obj::TrainedSpectrum)
+    (; spectrum, docs, embeddings, coeffs) = obj
+    docs_str = isnothing(docs) ? "-" : "$(length(docs))"
+    embeddings_str = isnothing(embeddings) ? "-" : "OK"
+    coefficients_str = isnothing(coeffs) ? "-" : "OK"
+
+    print(io,
+        nameof(typeof(obj)),
+        "(Spectrum: \"$(spectrum[1])\" vs. \"$(spectrum[2])\", Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
+end
+
 ## Other
 
 """

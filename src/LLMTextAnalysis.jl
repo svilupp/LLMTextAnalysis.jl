@@ -5,13 +5,15 @@ using UMAP, Clustering, Distances
 using SparseArrays: sparse
 using LinearAlgebra: normalize
 using PromptingTools
+using Random: shuffle
 using Statistics: mean
+using MLJLinearModels
 const PT = PromptingTools
 
-# export nunique
+# export nunique, sigmoid
 include("utils.jl")
 
-export DocIndex, TopicMetadata
+export DocIndex, TopicMetadata, TrainedConcept, TrainedSpectrum
 include("types.jl")
 
 export build_index, prepare_plot!
@@ -22,8 +24,9 @@ export build_clusters!
 # export build_topic
 include("topic_modelling.jl")
 
-# TODO: finish concept labelling
-# include("concept_labelling.jl")
+export cross_validate_accuracy, train_spectrum, train_concept, score
+# export create_folds
+include("concept_labeling.jl")
 
 function __init__()
     ## Load extra templates

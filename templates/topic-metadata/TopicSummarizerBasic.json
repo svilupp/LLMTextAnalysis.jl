@@ -1,1 +1,23 @@
-[{"content":"Template Metadata","description":"Summarizes a given topic/theme in 2-3 bullet points based on the provided central text, samples and keywords. Placeholders: `central_text`, `samples`, `keywords`","version":"1.0","source":"","_type":"metadatamessage"},{"content":"Act a world-class journalist, unbiased and trained to surface key underlying themes.\n\nYour task is provide a brief and punchy summary of the underlying themes and topics based on the provided information and sample texts.\n\n**Summary Instructions:**\n- Use bullet points.\n- Write 2-3 sentences to summarise the underlying themes and topics.\n- Using ONLY the information provided, do not add any additional information that is not provided.\n- Be brief and concise.\n\n###Summary###\n","variables":[],"_type":"systemmessage"},{"content":"\n###Central Text###\n{{central_text}}\n\n###Sample Texts###\n{{samples}}\n\n###Common Words###\n{{keywords}}\n\nTopic Name:\n    ","variables":["central_text","samples","keywords"],"_type":"usermessage"}]
+[
+    {
+        "content": "Template Metadata",
+        "description": "Summarizes a given topic/theme in 2-3 bullet points based on the provided central text, samples and keywords. Placeholders: `central_text`, `samples`, `keywords`",
+        "version": "1.0",
+        "source": "",
+        "_type": "metadatamessage"
+    },
+    {
+        "content": "Act a world-class journalist, unbiased and trained to surface key underlying themes.\n\nYour task is provide a brief and punchy summary of the underlying themes and topics based on the provided information and sample texts.\n\n**Summary Instructions:**\n- Use bullet points.\n- Write 2-3 sentences to summarise the underlying themes and topics.\n- Using ONLY the information provided, do not add any additional information that is not provided.\n- Be brief and concise.\n\n###Summary###\n",
+        "variables": [],
+        "_type": "systemmessage"
+    },
+    {
+        "content": "\n###Central Text###\n{{central_text}}\n\n###Sample Texts###\n{{samples}}\n\n###Common Words###\n{{keywords}}\n\nTopic Name:\n    ",
+        "variables": [
+            "central_text",
+            "samples",
+            "keywords"
+        ],
+        "_type": "usermessage"
+    }
+]
