@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Added `train_concept`. Introduces the ability to train a model focusing on a single, specific concept within a collection of documents. This function helps in identifying and scoring the presence or intensity of the selected concept across the document set. Ideal for thematic studies, sentiment analysis, or tracking specific ideas in text.
+- Added `train_concept`. Introduces the ability to train a model focusing on a single, specific concept within a collection of documents. This function helps in identifying and scoring the presence or intensity of the selected concept across the document set. Ideal for thematic studies, sentiment analysis, or tracking specific ideas in the text.
 - Added `train_spectrum`. Adds functionality to analyze documents across a spectrum defined by two contrasting concepts. This feature allows for a comparative analysis, providing insights into how documents align or contrast with two polar themes or sentiments.
 
 ##### Usage Example for `train_spectrum`
