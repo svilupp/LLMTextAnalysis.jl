@@ -62,7 +62,8 @@ Pkg.add("https://github.com/svilupp/LLMTextAnalysis.jl")
  
 The package depends on PromptingTools.jl, which facilitates integration with various Large Language Models. We recommend OpenAI for its efficiency, cost-effectiveness, and privacy. See [PromptingTools.jl documentation](https://github.com/svilupp/PromptingTools.jl) for setup details.
 
-### Basic Usage
+### Explore Topics
+
 Start analyzing your document corpus with these steps:
 
 1. Load your documents into the package.
@@ -91,6 +92,58 @@ pl = plot(index; title = "City of Austin Community Survey Themes")
 
 
 Run the full example via `examples/1_topics_in_city_of_austin_community_survey.jl`.
+
+### Identify and Score Documents on Arbitrary Concepts / Spectrum
+
+Sometimes you know what you're looking for, but it's hard to define the exact keywords. For example, you might want to identify documents that are "action-oriented" or "pessimistic" or "forward-looking".
+
+For these situations, `LLMTextAnalysis` offers two distinct functions for document analysis: `train_concept` and `train_spectrum`. Each serves a different purpose in text analysis:
+
+- **`train_concept`**: Focuses on analyzing a single, specific concept within documents (eg, "action-oriented")
+- **`train_spectrum`**: Analyzes documents in the context of two opposing concepts (eg, "optimistic" vs. "pessimistic" or "forward-looking" vs. "backward-looking")
+
+The resulting return types are `TrainedConcept` and `TrainedSpectrum`, respectively. Both can be used to score documents on the presence of the concept or their position on the spectrum.
+
+Why do we need `train_spectrum` and not simply use two `TrainedConcepts`? It's because opposite of "forward-looking" can be many things, eg, "short-sighted", "dwelling in the past", or simply "not-forward looking". 
+
+`train_spectrum` allows you to define the opposite concept that you need and score documents on the spectrum between the two.
+
+#### `train_concept`
+
+Identify and score the presence of a specific concept in documents.
+```julia
+index = build_index(docs)
+concept = train_concept(index, "sustainability")
+scores = score(index, concept)
+
+# show top 5 docs
+index.docs[first(sortperm(scores, rev = true), 5)]
+# 5-element Vector{String}:
+# ["focus on smart growth, sustainability and affordability are just as important as business development and should not be sacrificed for economic growth.", "SUSTAINABILITY OF CITY", "we need to plan for global climate change, water and energy programs must be robust", "Public transport and planned, sustainable, affordable growth are the most important issues.", "Make more conservation and sustainability efforts."]
+```
+
+#### `train_spectrum`
+
+Evaluate documents on a spectrum defined by two contrasting concepts.
+
+```julia
+index = "..." # re-use the index from the previous example
+# aigenerate_kwargs are passed directly to PromptingTools.aigenerate (see PromptingTools.jl docs)
+spectrum = train_spectrum(index, ("forward-looking", "dwelling in the past"); 
+  aigenerate_kwargs = (;model="gpt3t"))
+scores = score(index, spectrum)
+
+# show top 5 docs for "forward-looking" (spectrum 1, ie, the "highest" score)
+index.docs[first(sortperm(scores, rev = true), 5)]
+# 5-element Vector{String}:
+# ["He is doing a great job. Setting planning for growth, transportation and mobility together is an excellent approach.", "PLAN FOR ACCELERATED GROWTH. CLIMATE CHANGES PROMISES TO DELIVER MORE COASTAL CRISIS AND POPULATION DISPLACEMENT. AUSTIN WILL EXPAND AS A RESULT. THINK BIG. THANK YOU FOR PRIORITIZING SMART GROWTH AND A DENSE URBAN LANDSCAPE.", "Austin will grow! Prioritize development and roadways.", "Affordable housing. Better planning for future. Mass transit (rail system that covers City wide.", "PLAN FOR THE FUTURE AND SUSTAINABLE GROWTH. STOP FOCUSING ON EXCLUSIVE SERVICES LIKE TOLL ROAD EXPANSION AND INSTEAD, PUSH FOR PROGRAMS WITH THE LARGEST BENEFIT FOR THE MOST PEOPLE IN THE FUTURE, LIKE A SUBWAY SYSTEM AND CITY-SPONSORED DISTRIBUTED SOLAR AND ELECTRIC VEHICLE NETWORK."]
+```
+
+> [!TIP]
+> Choose `train_concept` for depth in a single theme, and `train_spectrum` for comparative insights across two themes. Each function enhances text analysis with its unique approach to understanding document content.
+
+> [!TIP]
+> Remember to `serialize` your trained concepts and spectra to the disk for future use. This will save you time and money when you need to restart the REPL session.
 
 ### Advanced Features and Best Practices
 This section covers more advanced use cases and best practices for optimal results.

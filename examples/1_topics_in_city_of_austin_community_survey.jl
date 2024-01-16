@@ -28,7 +28,7 @@ index = build_index(docs)
 # Plot the index
 #
 # - You use any keywords that you're used to from Plots.jl, eg, to customize the `title` or `size`
-# - `labeler_kwargs` allows us control the LLM labeling of topics, I like the latest GPT-3.5-Turbo-1106 for the labelling. We can use any kwargs from PromptingTools.jl
+# - `labeler_kwargs` allows us to control the LLM labeling of topics, I like the latest GPT-3.5-Turbo-1106 for the labeling. We can use any kwargs from PromptingTools.jl
 # - You can specify the number of topics to show with `k`, or the height of the dendrogram to cut at with `h` (see `?Clustering.hclust`)
 # - See the detail with `?plot`
 pl = plot(index;
