@@ -1,7 +1,7 @@
 using LLMTextAnalysis
 using PromptingTools
 const PT = PromptingTools
-using Test, Random
+using Test, Random, LinearAlgebra
 using Aqua
 
 @testset "Code quality (Aqua.jl)" begin

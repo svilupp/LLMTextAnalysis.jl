@@ -176,17 +176,6 @@ end
     train!(index::AbstractDocumentIndex,
            concept::TrainedConcept;
            verbose::Bool = true,
-           overwrite::bool = false,
-           rewriter_template::Symbol = :StatementRewriter,
-           lambda::Real = 1e-3, negatives_samples::Int = 1,
-           aigenerate_kwargs::NamedTuple = NamedTuple(),
-           aiembed_kwargs::NamedTuple = NamedTuple(),
-"""
-
-"""
-    train!(index::AbstractDocumentIndex,
-           concept::TrainedConcept;
-           verbose::Bool = true,
            overwrite::Bool = false,
            rewriter_template::Symbol = :StatementRewriter,
            lambda::Real = 1e-3, negatives_samples::Int = 1,
@@ -266,6 +255,7 @@ function train!(index::AbstractDocumentIndex,
         end
         # We remove the embedding of the original source documents
         # To isolate the "direction" of the concept
+        @info size(embeddings) size(index.embeddings)
         concept.embeddings = (embeddings .-
                               @view(index.embeddings[:, concept.source_doc_ids])) .|>
                              Float32
@@ -409,7 +399,7 @@ end
 
 Finish a partially trained Spectrum or retrain an existing one (with `overwrite=true`).
 
-See also: `train_spectrum`, `train_concept`
+See also: `train_spectrum`, `train_concept`, `score`
 
 # Arguments
 - `index::AbstractDocumentIndex`: The document index containing the documents to be analyzed.

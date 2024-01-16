@@ -104,7 +104,42 @@ function Base.show(io::IO, index::DocIndex)
 end
 
 ## Concept Labeling
-# TODO: add documentation
+"""
+    TrainedConcept
+
+The `TrainedConcept` struct is used for representing and working with a trained concept model.
+
+It encapsulates all the necessary information required to analyze and score documents based on their relevance to a specific concept.
+
+# Fields
+
+- `index_id`: A unique identifier for the `AbstractDocumentIndex` associated with this concept.
+- `source_doc_ids`: Indices of the documents from the `AbstractDocumentIndex` used for training the concept model. Corresponds to `index.docs`
+- `concept`: The specific concept (as a string) that this model is trained to analyze.
+- `docs`: The collection of rewritten documents, which are modified to reflect the concept.
+- `embeddings`: The embeddings of the rewritten documents, used for training the model. Columns are documents, rows are dimensions.
+- `coeffs`: The coefficients of the trained logistic regression model. Maps to each dimension in `embeddings`.
+
+
+# Example
+
+```julia
+index = build_index(...)
+
+# Training a concept
+concept = train_concept(index, "sustainability")
+
+# Using TrainedConcept for scoring
+scores = score(index, concept)
+# or use it as a functor: `scores = concept(index)`
+
+# Accessing the model details
+println("Concept: ", concept.concept)
+println("Coefficients: ", concept.coeffs)
+println("Source Document IDs: ", concept.source_doc_ids)
+println("Re-written Documents: ", concept.docs) # good for debugging if results are poor
+```
+"""
 @kwdef mutable struct TrainedConcept
     index_id::Symbol # source index
     # required, list of source document positions in index
@@ -117,6 +152,45 @@ end
     embeddings::Union{Matrix{Float32}, Nothing} = nothing
     coeffs::Union{Vector{Float32}, Nothing} = nothing
 end
+
+"""
+    TrainedSpectrum
+
+The `TrainedSpectrum` is used to score documents across a spectrum defined by two contrasting concepts. 
+
+It encapsulates the essential information required to evaluate and score documents based on their alignment with the specified spectrum.
+
+Note: `TrainedSpectrum` supports functor behavior, allowing it to be used as a function to score documents in an `AbstractDocumentIndex` based on their alignment with the spectrum.
+
+# Fields
+
+- `index_id`: A unique identifier for the `AbstractDocumentIndex` associated with the spectrum.
+- `source_doc_ids`: Indices of the documents from the `AbstractDocumentIndex` used for training the spectrum model. Corresponds to `index.docs`.
+- `spectrum`: A tuple containing the two contrasting concepts (as strings) that define the spectrum.
+- `docs`: A collection of rewritten documents, modified to align with the two ends of the spectrum.
+- `embeddings`: The embeddings of the rewritten documents, used for training the model. Columns are documents, rows are dimensions.
+- `coeffs`: Coefficients of the trained logistic regression model, corresponding to each dimension in `embeddings`.
+
+# Example
+
+```julia
+
+index = build_index(...)
+
+# Create and train a spectrum model
+spectrum = TrainedSpectrum(index, ("innovation", "tradition"))
+
+# Using TrainedSpectrum for scoring
+scores = score(index, concept)
+# or use it as a functor: `scores = spectrum(index)`
+
+# Accessing the model details
+println("Spectrum: ", spectrum.spectrum)
+println("Coefficients: ", spectrum.coeffs)
+println("Source Document IDs: ", spectrum.source_doc_ids)
+println("Re-written Documents: ", spectrum.docs) # good for debugging if results are poor
+```
+"""
 @kwdef mutable struct TrainedSpectrum
     index_id::Symbol # source index
     # required, list of source document positions in index
