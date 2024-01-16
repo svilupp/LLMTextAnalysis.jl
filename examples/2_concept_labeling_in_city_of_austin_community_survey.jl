@@ -1,6 +1,7 @@
 # # Example 2: Label Arbitrary Concepts in the City of Austin Community Survey
 # For this tutorial, we will use the [City of Austin's Community Survey](https://data.austintexas.gov/Health-and-Community-Services/2019-City-of-Austin-Community-Survey/s2py-ceb7).
-# We will pick one open-ended question and extract the main themes from the answers.
+#
+# We will pick one open-ended question and explore the concepts of "action-oriented" and "forward-looking" in the answers.
 
 # Necessary imports
 using Downloads, CSV, DataFrames
@@ -60,6 +61,9 @@ spectrum = train_spectrum(index,
 
 scores = score(index, spectrum)
 index.docs[first(sortperm(scores, rev = true), 5)]
+
+# And how about the ones "dwelling in the past" (set `rev=false`)?
+index.docs[first(sortperm(scores, rev = false), 5)]
 
 # ## Plot both
 
