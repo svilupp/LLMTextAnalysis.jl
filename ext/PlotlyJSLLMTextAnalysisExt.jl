@@ -74,7 +74,8 @@ function PlotlyJS.plot(index::AbstractDocumentIndex; verbose::Bool = true,
 
             else
                 hovertemplate = "<b>Topic:</b> $(topic.label)<br><b>Text:</b> %{text}<br>%{customdata}<extra></extra>"
-                customdata = map(Tables.rows((hoverdata[docs_idx, :]))) do row
+                subset = Tables.subset(hoverdata, docs_idx; viewhint = true)
+                customdata = map(Tables.rows(subset)) do row
                     join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
                           for col in Tables.columnnames(row)], "<br>")
                 end
