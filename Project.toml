@@ -1,7 +1,7 @@
 name = "LLMTextAnalysis"
 uuid = "a88142f3-a164-49e9-925a-9408902b6922"
 authors = ["J S <49557684+svilupp@users.noreply.github.com> and contributors"]
-version = "0.2.0-DEV"
+version = "0.2.0"
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
