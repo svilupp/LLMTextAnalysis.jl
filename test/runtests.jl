@@ -2,7 +2,8 @@ using LLMTextAnalysis
 using PromptingTools
 const PT = PromptingTools
 using Test, Random, LinearAlgebra
-import Plots, PlotlyJS
+import Plots, PlotlyJS, Tables
+Plots.plotlyjs();
 using Aqua
 
 @testset "Code quality (Aqua.jl)" begin

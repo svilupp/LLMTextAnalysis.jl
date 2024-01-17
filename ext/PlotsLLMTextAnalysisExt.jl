@@ -74,7 +74,7 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
             extras = if isnothing(hoverdata)
                 fill("", length(scores1))
             else
-                map(Tables.rows(@view(hoverdata[docs_idx, :]))) do row
+                map(Tables.rows((hoverdata[docs_idx, :]))) do row
                     join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
                           for col in Tables.columnnames(row)], "<br>")
                 end

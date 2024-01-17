@@ -20,29 +20,23 @@
             docs_idx = [3, 4],
             label = "Topic Name",
             summary = "Topic Name")]
+    hoverdata = Tables.table(fill("something", length(index.docs), 2);
+        header = [:extra, :extra2])
     # Plots.jl
     Plots.plot(index;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
 
     Plots.scatter(index;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
     # PlotlyJS.jl
     PlotlyJS.plot(index;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
     PlotlyJS.scatter(index;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
 end
 
 @testset "plot-concept" begin
@@ -74,27 +68,21 @@ end
     spectrum = TrainedSpectrum(;
         index_id = index.id, source_doc_ids = [1, 2],
         spectrum = ("x", "y"), coeffs = 2ones(Float32, 10))
+    hoverdata = Tables.table(fill("something", length(index.docs), 2);
+        header = [:extra, :extra2])
     # Plots.jl
     Plots.plot(index, concept, spectrum;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
 
     Plots.scatter(index, spectrum, concept;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
     # PlotlyJS.jl
     PlotlyJS.plot(index, concept, spectrum;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
     PlotlyJS.scatter(index, concept, spectrum;
         title = "abc",
-        hoverdata = DataFrame(;
-            extra = fill("some data", length(index.docs)),
-            extra2 = fill("some other data", length(index.docs))))
+        hoverdata)
 end
