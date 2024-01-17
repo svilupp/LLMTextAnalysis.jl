@@ -1,16 +1,18 @@
 # # Example 2: Label Arbitrary Concepts in the City of Austin Community Survey
 # For this tutorial, we will use the [City of Austin's Community Survey](https://data.austintexas.gov/Health-and-Community-Services/2019-City-of-Austin-Community-Survey/s2py-ceb7).
 #
-# We will pick one open-ended question and explore the concepts of "action-oriented" and "forward-looking" in the answers.
+# We will pick one open-ended question. Let's say we want to help the mayor to prioritize ideas,
+# so we will lay out the verbatims against the concepts of being "action-oriented" and "forward-looking".
+#
+# You can choose any concepts that you want.
 
 # Necessary imports
 using Downloads, CSV, DataFrames
 using Plots
 using LLMTextAnalysis
-##PLOTLYJS##
-plotlyjs(); # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
+plotlyjs(); # plotlyjs() is the recommended backend for Plots.jl for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
 
-# ## Prepare the data
+# ## Prepare the Data
 # Download the survey data
 Downloads.download("https://data.austintexas.gov/api/views/s2py-ceb7/rows.csv?accessType=DOWNLOAD",
     joinpath(@__DIR__, "cityofaustin.csv"));
@@ -43,6 +45,8 @@ index = build_index(docs)
 
 # Let's say we want to identify documents that are "action-oriented". 
 # We can use `train_concept` to train a model to identify documents that are "action-oriented" and score the documents against the concept.
+#
+# Let's show the top 5 documents that are most "action-oriented".
 
 concept = train_concept(index,
     "action-oriented";
@@ -53,10 +57,14 @@ index.docs[first(sortperm(scores, rev = true), 5)]
 
 # ## Score Documents along a Spectrum
 
-# We also want to identify documents that are "forward-looking" vs "dwelling in the past".
+# We may want to define an arbitrary "spectrum" (axis/polar opposites) and score documents on it.
+# Let's introduce a spectrum for "dwelling in the past" vs "forward-looking". 
+# The higher the score (eg, 100%), the more "forward-looking" the document/text is.
+#
+# Let's show the top 5 documents that are most "forward-looking".
 
 spectrum = train_spectrum(index,
-    ("forward-looking", "dwelling in the past");
+    ("dwelling in the past", "forward-looking");
     aigenerate_kwargs = (; model = "gpt3t"))
 
 scores = score(index, spectrum)
@@ -65,11 +73,15 @@ index.docs[first(sortperm(scores, rev = true), 5)]
 # And how about the ones "dwelling in the past" (set `rev=false`)?
 index.docs[first(sortperm(scores, rev = false), 5)]
 
-# ## Plot both
+# ## Summarize via Plot
 
-# Let's plot our results.
-# We can use `plot` to plot the documents along the spectrum between "forward-looking" and "dwelling in the past".
-# The positions of args `concept` and `spectrum` are important, as they determine the order of the concepts in the plot (x-axis, y-axis)
+# Let's interactively explore our results.
+#
+# We can use `plot` to plot the documents along the trained concepts and spectrums (simple scatter plot).
+# The positions of args `concept` and `spectrum` are important, as they determine the position of the concepts in the plot (x-axis, y-axis)
 
-pl = plot(index, spectrum, concept;
-    title = "Prioritizing Action-Oriented and Forward-Looking Ideas")
+pl = PlotlyJS.plot(index, spectrum, concept;
+    title = "Prioritizing Action-Oriented and Forward-Looking Ideas (Top-right Corner)")
+
+# Perhaps you need to add some additional information to the tooltip for each data point? 
+# You can do that with `hoverdata` argument, see `?plot` for more details.

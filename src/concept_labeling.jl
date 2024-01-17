@@ -328,16 +328,16 @@ See also: `train!`, `train_concept`, `score`
 # Example
 ```julia
 # Assuming `index` is an existing document index
-my_spectrum = ("optimistic", "pessimistic")
+my_spectrum = ("pessimistic", "optimistic")
 spectrum = train_spectrum(index, my_spectrum)
 ```
 
-Show the top 5 highest scoring documents for the spectrum 1 (`spectrum.spectrum[1]` which is "optimistic" in this example):
+Show the top 5 highest scoring documents for the spectrum 2 (`spectrum.spectrum[2]` which is "optimistic" in this example):
 ```julia
 scores = score(index, spectrum)
 index.docs[first(sortperm(scores, rev = true), 5)]
 
-# Use rev=false to get the highest scoring documents for spectrum 2 (opposite end)
+# Use rev=false to get the highest scoring documents for spectrum 1 (opposite end)
 ```
 
 You can customize the analysis by passing additional arguments to the AI generation and embedding functions. For example, you can specify the model to use for generation and how many samples to use:
@@ -354,7 +354,8 @@ For troubleshooting, you can fit the model manually and inspect the accuracy:
 
 ```julia
 X = spectrum.embeddings'
-y = vcat(ones(length(spectrum.source_doc_ids)), -1ones(length(spectrum.source_doc_ids))) .|>
+# First half is spectrum 1, second half is spectrum 2
+y = vcat(-1ones(length(spectrum.source_doc_ids)), ones(length(spectrum.source_doc_ids))) .|>
     Int
 accuracy = cross_validate_accuracy(X, y; k = 4, lambda = 1e-8)
 ```
@@ -501,7 +502,7 @@ function train!(index::AbstractDocumentIndex,
     # transpose to match the MLJLinearModels convention
     X = spectrum.embeddings'
     # expects labels as +-1
-    y = vcat(ones(length(source_doc_ids)), -1ones(length(source_doc_ids))) .|> Int
+    y = vcat(-1ones(length(source_doc_ids)), ones(length(source_doc_ids))) .|> Int
 
     ## Benchmark if it's a sensible model
     accuracy = cross_validate_accuracy(X, y; k = 4, verbose = false, lambda)
@@ -525,7 +526,7 @@ end
 Scores all documents in the provided `index` based on the `TrainedSpectrum`. 
 
 The score reflects how closely each document aligns with each of the ends of the trained spectrum. 
-A score closer to 1 indicates a higher alignment to `spectrum.spectrum[1]`, while a score closer to 0 indicates a higher alignment to `spectrum.spectrum[2]`.
+Scores are left-to-right, ie, a score closer to 0 indicates a higher alignment to `spectrum.spectrum[1]` and a score closer to 1 indicates a higher alignment to `spectrum.spectrum[2]`.
 
 # Arguments
 - `index::AbstractDocumentIndex`: The index containing the documents to be scored.
@@ -541,11 +542,11 @@ A score closer to 1 indicates a higher alignment to `spectrum.spectrum[1]`, whil
 scores = score(index, spectrum)
 ```
 
-You can show the top 5 highest scoring documents for the spectrum 1:
+You can show the top 5 highest scoring documents for the spectrum 2:
 ```julia
 index.docs[first(sortperm(scores, rev = true), 5)]
 
-# Use rev=false if you want to see documents closest to spectrum 2 (opposite end)
+# Use rev=false if you want to see documents closest to spectrum 1 (opposite end)
 ```
 
 This function is useful for ranking all documents along the chosen `spectrum`.
@@ -568,7 +569,7 @@ end
 A method definition that allows a `TrainedSpectrum` object to be called as a function to score documents in an `index`. This method delegates to the `score` function.
 
 The score reflects how closely each document aligns with each of the ends of the trained spectrum. 
-A score closer to 1 indicates a higher alignment to `spectrum.spectrum[1]`, while a score closer to 0 indicates a higher alignment to `spectrum.spectrum[2]`.
+Scores are left-to-right, ie, a score closer to 0 indicates a higher alignment to `spectrum.spectrum[1]` and a score closer to 1 indicates a higher alignment to `spectrum.spectrum[2]`.
 
 # Arguments
 - `index::AbstractDocumentIndex`: The index containing the documents to be scored.

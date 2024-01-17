@@ -140,7 +140,7 @@ index.docs[first(sortperm(scores, rev = true), 5)]
 ```
 
 > [!TIP]
-> Choose `train_concept` for depth in a single theme, and `train_spectrum` for comparative insights across two themes. Each function enhances text analysis with its unique approach to understanding document content.
+> Choose `train_concept` for alignment/closeness to a single theme, and `train_spectrum` for the position on the arbitrary spectrum defined by the two polarizing themes. Each function enhances text analysis with its unique approach to understanding content of each text/snippet/document.
 
 > [!TIP]
 > Remember to `serialize` your trained concepts and spectra to the disk for future use. This will save you time and money when you need to restart the REPL session.

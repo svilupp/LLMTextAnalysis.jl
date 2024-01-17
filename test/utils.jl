@@ -1,4 +1,4 @@
-using LLMTextAnalysis: nunique, sigmoid
+using LLMTextAnalysis: nunique, sigmoid, wrap_string
 
 @testset "nunique" begin
     @test nunique([1, 2, 3, 4, 5]) == 5
@@ -25,4 +25,15 @@ end
     for x in -100.0:1.0:100.0
         @test 0.0 ≤ sigmoid(x) ≤ 1.0
     end
+end
+
+@testset "wrap_string" begin
+    @test wrap_string("", 10) == ""
+    @test wrap_string("Hi", 10) == "Hi"
+    output = wrap_string("This function will wrap words into lines", 10)
+    @test maximum(length.(split(output, "\n"))) <= 10
+    output = wrap_string("This function will wrap words into lines", 20)
+    @test_broken maximum(length.(split(output, "\n"))) <= 20 #bug, it adds back the separator
+    str = "This function will wrap words into lines"
+    @test wrap_string(str, length(str)) == str
 end

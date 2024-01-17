@@ -204,6 +204,9 @@ println("Re-written Documents: ", spectrum.docs) # good for debugging if results
     coeffs::Union{Vector{Float32}, Nothing} = nothing
 end
 
+label(obj::TrainedConcept) = "\"$(obj.concept)\""
+label(obj::TrainedSpectrum) = "\"$(obj.spectrum[1])\" vs. \"$(obj.spectrum[2])\""
+
 function Base.show(io::IO, obj::TrainedConcept)
     (; concept, docs, embeddings, coeffs) = obj
     docs_str = isnothing(docs) ? "-" : "$(length(docs))"
@@ -212,7 +215,7 @@ function Base.show(io::IO, obj::TrainedConcept)
 
     print(io,
         nameof(typeof(obj)),
-        "(Concept: \"$(concept)\", Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
+        "(Concept: $(label(obj)), Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
 end
 function Base.show(io::IO, obj::TrainedSpectrum)
     (; spectrum, docs, embeddings, coeffs) = obj
@@ -222,7 +225,7 @@ function Base.show(io::IO, obj::TrainedSpectrum)
 
     print(io,
         nameof(typeof(obj)),
-        "(Spectrum: \"$(spectrum[1])\" vs. \"$(spectrum[2])\", Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
+        "(Spectrum: $(label(obj)), Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
 end
 
 ## Other

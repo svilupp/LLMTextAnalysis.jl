@@ -7,7 +7,7 @@ using LinearAlgebra: normalize
 using PromptingTools
 using Random: shuffle
 using Statistics: mean
-using MLJLinearModels
+using MLJLinearModels, Tables
 const PT = PromptingTools
 
 # export nunique, sigmoid

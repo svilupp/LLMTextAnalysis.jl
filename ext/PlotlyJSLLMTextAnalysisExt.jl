@@ -1,11 +1,11 @@
-module PlotsLLMTextAnalysisExt
+module PlotlyJSLLMTextAnalysisExt
 
-using Plots
+using PlotlyJS
 using LLMTextAnalysis, Tables
 using LLMTextAnalysis: AbstractDocumentIndex, label, wrap_string
 
 """
-    Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
+    PlotlyJS.plot(index::AbstractDocumentIndex; verbose::Bool = true,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
         add_hover::Bool = true,  hoverdata = nothing, cluster_kwargs::NamedTuple = NamedTuple(),
@@ -21,7 +21,7 @@ Generates a scatter plot of the document embeddings, colored by topic assignment
 - `add_hover`: Whether to add a hover tooltip to the plot.
 - `hoverdata`: A Tables.jl-compatible object (eg, DataFrame) with the hover data to add to each tooltip.
   Assumes that rows correspond to the individual documents in `index.docs`. Defaults to nothing.
-- Additional arguments to configure the plot.
+- Additional keyword arguments to configure the layout of the plot (passed to `PlotlyJS.Layout`).
 
 # Returns
 - A scatter plot of the document embeddings.
@@ -30,10 +30,10 @@ Generates a scatter plot of the document embeddings, colored by topic assignment
 ```julia
 index = build_index(["Document 1", "Document 2"])
 prepare_plot!(index)
-pl = plot(index)
+pl = PlotlyJS.plot(index; title = "MyPlot")
 ```
 """
-function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
+function PlotlyJS.plot(index::AbstractDocumentIndex; verbose::Bool = true,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
         add_hover::Bool = true, hoverdata = nothing,
@@ -63,44 +63,49 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
     ## Plot
     (; plot_data) = index
     topics = index.topic_levels[topic_level]
-    pl = Plots.scatter(;
-        size = (800, 500),
-        title = "Document Embeddings",
-        xlabel = "UMAP 1",
-        ylabel = "UMAP 2")
+
+    traces = PlotlyJS.AbstractTrace[]
     for topic in topics
         docs_idx = topic.docs_idx
-        hover = if add_hover
-            extras = if isnothing(hoverdata)
-                fill("", length(scores1))
+        if add_hover
+            if isnothing(hoverdata)
+                hovertemplate = "<b>Topic:</b> $(topic.label)<br><b>Text:</b> %{text}<extra></extra>"
+                customdata = fill("", length(docs_idx))
+
             else
+                hovertemplate = "<b>Topic:</b> $(topic.label)<br><b>Text:</b> %{text}<br>%{customdata}<extra></extra>"
                 subset = Tables.subset(hoverdata, docs_idx; viewhint = true)
-                map(Tables.rows(subset)) do row
+                customdata = map(Tables.rows(subset)) do row
                     join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
                           for col in Tables.columnnames(row)], "<br>")
                 end
             end
-            ["""
-<b>Topic</b>: $(topic.label)<br>
-<b>Text</b>: $(wrap_string(index.docs[docs_idx[i]], text_width; newline="<br>"))<br>
-$(extras[i])
-"""
-             for i in eachindex(docs_idx, extras)]
         else
-            nothing
+            hovertemplate = ""
         end
-        Plots.scatter!(plot_data[1, docs_idx],
-            plot_data[2, docs_idx];
-            hover,
-            label = topic.label,
-            legend = :outertopright)
+        trace = PlotlyJS.scatter(;
+            x = plot_data[1, docs_idx],
+            y = plot_data[2, docs_idx],
+            name = topic.label,
+            text = wrap_string.(index.docs[topic.docs_idx], text_width; newline = "<br>"),
+            hovertemplate,
+            customdata,
+            mode = "markers")
+        push!(traces, trace)
     end
-    pl = plot(pl; plot_kwargs...)
+
+    layout = PlotlyJS.Layout(;
+        title = "Document Embeddings",
+        xaxis_title = "UMAP 1",
+        yaxis_title = "UMAP 2", template = "plotly_white",
+        plot_kwargs...)
+    pl = PlotlyJS.plot(traces, layout)
+
     return pl
 end
 
 """
-    Plots.plot(index::AbstractDocumentIndex,
+    PlotlyJS.plot(index::AbstractDocumentIndex,
         concept1::Union{TrainedConcept, TrainedSpectrum},
         concept2::Union{TrainedConcept, TrainedSpectrum}; verbose::Bool = true,
         text_width::Int = 30,
@@ -119,7 +124,7 @@ It positions the documents in the index according to their scores for the two co
 - `add_hover`: Whether to add a hover tooltip to the plot.
 - `hoverdata`: A Tables.jl-compatible object (eg, DataFrame) with the hover data to add to each tooltip.
   Assumes that rows correspond to the individual documents in `index.docs`. Defaults to nothing.
-- Additional arguments to configure the plot.
+- Additional keyword arguments to configure the layout of the plot (passed to `PlotlyJS.Layout`).
 
 # Returns
 - A scatter plot of the document embeddings.
@@ -127,14 +132,15 @@ It positions the documents in the index according to their scores for the two co
 # Example
 
 ```julia
-hoverdata = DataFrame(;
-    extra = fill("some data", length(scores1)),
-    extra2 = fill("some other data", length(scores1)))
+# assume we already have index, spectrum, concept
 
-plot(index, spectrum, concept; title = "My title", hoverdata)
+hoverdata = DataFrame(;
+    extra = fill("some data", length(index.docs)),
+    extra2 = fill("some other data", length(index.docs)))
+pl = PlotlyJS.plot(index, spectrum, concept; title = "MyTitle", hoverdata)
 ```
 """
-function Plots.plot(index::AbstractDocumentIndex,
+function PlotlyJS.plot(index::AbstractDocumentIndex,
         concept1::Union{TrainedConcept, TrainedSpectrum},
         concept2::Union{TrainedConcept, TrainedSpectrum};
         verbose::Bool = true,
@@ -148,46 +154,49 @@ function Plots.plot(index::AbstractDocumentIndex,
     scores1 = score(index, concept1)
     scores2 = score(index, concept2)
 
-    hover = if add_hover
-        extras = if isnothing(hoverdata)
-            fill("", length(scores1))
+    if add_hover
+        if isnothing(hoverdata)
+            hovertemplate = "<b>Text:</b> %{text}<br><b>Score #1</b>: %{x}<br><b>Score #2</b>: %{y}<extra></extra>"
+            customdata = fill("", length(scores1))
+
         else
-            map(Tables.rows(hoverdata)) do row
+            hovertemplate = "<b>Text:</b> %{text}<br><b>Score #1</b>: %{x}<br><b>Score #2</b>: %{y:,.0%}<br>%{customdata}<extra></extra>"
+            customdata = map(Tables.rows(hoverdata)) do row
                 join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
                       for col in Tables.columnnames(row)], "<br>")
             end
         end
-        ["""
-    <b>Text</b>: \"$(wrap_string(index.docs[i],text_width; newline="<br>"))\"<br>
-    <b>Score #1</b>: $(round(Int,100*scores1[i]))%<br>
-    <b>Score #2</b>: $(round(Int,100*scores2[i]))%<br>
-    $(extras[i])
-    """
-         for i in eachindex(index.docs, extras)]
     else
-        nothing
+        hovertemplate = ""
     end
-    pl = Plots.scatter(scores1, scores2;
-        size = (800, 500),
+
+    trace = PlotlyJS.scatter(; x = scores1, y = scores2,
+        text = wrap_string.(index.docs, text_width; newline = "<br>"),
+        hovertemplate,
+        customdata,
+        mode = "markers")
+
+    layout = PlotlyJS.Layout(;
         title = "Document Embeddings",
-        label = "",
-        xlabel = label(concept1),
-        ylabel = label(concept2),
-        yformatter = x -> "$(round(Int, 100x))%",
-        xformatter = x -> "$(round(Int, 100x))%",
-        hover,
+        xaxis_title = label(concept1),
+        yaxis_title = label(concept2),
+        xaxis_tickformat = ",.0%",
+        yaxis_tickformat = ",.0%",
+        template = "plotly_white",
         plot_kwargs...)
+    pl = PlotlyJS.plot(trace, layout)
+
     return pl
 end
 
 "Creates a scatter plot of the topics behind documents in `index`. See `?plot` for details."
-Plots.scatter(index::AbstractDocumentIndex; kwargs...) = Plots.plot(index; kwargs...)
+PlotlyJS.scatter(index::AbstractDocumentIndex; kwargs...) = PlotlyJS.plot(index; kwargs...)
 
 "Creates a scatter plot of `concept1` vs `concept2` for the documents in `index`. See `?plot` for details."
-function Plots.scatter(index::AbstractDocumentIndex,
+function PlotlyJS.scatter(index::AbstractDocumentIndex,
         concept1::Union{TrainedConcept, TrainedSpectrum},
         concept2::Union{TrainedConcept, TrainedSpectrum}; kwargs...)
-    Plots.plot(index, concept1, concept2; kwargs...)
+    PlotlyJS.plot(index, concept1, concept2; kwargs...)
 end
 
 end # end module
