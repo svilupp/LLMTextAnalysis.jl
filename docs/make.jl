@@ -22,6 +22,7 @@ makedocs(;
         "Home" => "index.md",
         "Examples" => [
             "Explore Topics in Your Documents" => "examples/1_topics_in_city_of_austin_community_survey.md",
+            "Look for specific Concept/Spectrum" => "examples/2_concept_labeling_in_city_of_austin_community_survey.md",
         ],
         "F.A.Q." => "FAQ.md",
         "References" => "api_reference.md",
