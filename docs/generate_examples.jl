@@ -20,7 +20,7 @@ function update_plotly_for_documenter(content)
     content = replace(content, r"^\s*plotlyjs().*?$"m => "")
     content = replace(content, "plot(" => "PlotlyJS.plot(")
     content = replace(content,
-        r"^\s*pl\d{0,1}$"m => "PlotlyDocumenter.to_documenter(pl) #hide")
+        r"^\s*(pl\d{0,1})$"m => s"PlotlyDocumenter.to_documenter(\1) #hide")
     return content
 end
 

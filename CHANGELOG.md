@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.2.1]
+
+### Fixed
+- Updated documentation to show Example 2 for concept/spectrum training.
+
 ## [0.2.0]
 
 ### Added
