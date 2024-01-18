@@ -80,8 +80,10 @@ index.docs[first(sortperm(scores, rev = false), 5)]
 # We can use `plot` to plot the documents along the trained concepts and spectrums (simple scatter plot).
 # The positions of args `concept` and `spectrum` are important, as they determine the position of the concepts in the plot (x-axis, y-axis)
 
-pl = PlotlyJS.plot(index, spectrum, concept;
+pl = plot(index, spectrum, concept;
     title = "Prioritizing Action-Oriented and Forward-Looking Ideas (Top-right Corner)")
+pl
 
-# Perhaps you need to add some additional information to the tooltip for each data point? 
+#
+# What if you need to add some additional information to the tooltip for each data point? 
 # You can do that with `hoverdata` argument, see `?plot` for more details.
