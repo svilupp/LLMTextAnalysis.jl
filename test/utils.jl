@@ -30,6 +30,7 @@ end
 @testset "wrap_string" begin
     @test wrap_string("", 10) == ""
     @test wrap_string("Hi", 10) == "Hi"
+    @test wrap_string(strip(" Hi "), 10) == "Hi" # SubString type
     output = wrap_string("This function will wrap words into lines", 10)
     @test maximum(length.(split(output, "\n"))) <= 10
     output = wrap_string("This function will wrap words into lines", 20)

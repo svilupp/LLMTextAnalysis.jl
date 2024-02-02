@@ -16,7 +16,7 @@ Optionally, you can specify the `newline` character or string to use.
 wrap_string("Certainly, here's a function in Julia that will wrap a string according to the specifications:", 10) |> print
 ```
 """
-function wrap_string(str::String,
+function wrap_string(str::AbstractString,
         text_width::Int = 20;
         newline::Union{AbstractString, AbstractChar} = '\n')
     words = split(str)
