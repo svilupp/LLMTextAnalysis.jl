@@ -57,7 +57,7 @@ Install LLMTextAnalysis.jl via a direct link (it's not yet registered).
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/svilupp/LLMTextAnalysis.jl")
+Pkg.add("LLMTextAnalysis.jl")
 ```
  
 The package depends on PromptingTools.jl, which facilitates integration with various Large Language Models. We recommend OpenAI for its efficiency, cost-effectiveness, and privacy. See [PromptingTools.jl documentation](https://github.com/svilupp/PromptingTools.jl) for setup details.
