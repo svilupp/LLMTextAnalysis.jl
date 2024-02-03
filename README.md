@@ -53,11 +53,11 @@ plot(index)
 For some visual examples, scroll down to the [Basic Usage](#basic-usage) section.
 
 ### Installation and Setup
-Install LLMTextAnalysis.jl via a direct link (it's not yet registered).
+Install LLMTextAnalysis.jl from the REPL with `]LLMTextAnalysis` or via:
 
 ```julia
 using Pkg
-Pkg.add("https://github.com/svilupp/LLMTextAnalysis.jl")
+Pkg.add("LLMTextAnalysis")
 ```
  
 The package depends on PromptingTools.jl, which facilitates integration with various Large Language Models. We recommend OpenAI for its efficiency, cost-effectiveness, and privacy. See [PromptingTools.jl documentation](https://github.com/svilupp/PromptingTools.jl) for setup details.
