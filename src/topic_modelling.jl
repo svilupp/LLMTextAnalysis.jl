@@ -36,7 +36,8 @@ assignments = [1, 1]
 metadata = build_topic(index, assignments, 1)
 ```
 """
-function build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
+function build_topic(
+        index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
         topic_level::Int = nunique(assignments),
         verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
         label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
@@ -97,7 +98,10 @@ function build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, top
             aikwargs...)
         !isnothing(cost_tracker) &&
             Threads.atomic_add!(cost_tracker, PT.call_cost(msg, model)) # track costs
-        msg.content
+        ## quick hack for weaker models that repeat the sentence
+        clean = split(msg.content, "###\n")[end]
+        clean = split(clean, "topic name is:")[end]
+        strip(clean)
     else
         ""
     end
@@ -111,7 +115,9 @@ function build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, top
             aikwargs...)
         !isnothing(cost_tracker) &&
             Threads.atomic_add!(cost_tracker, PT.call_cost(msg, model)) # track costs
-        msg.content
+        ## quick hack for weaker models that repeat the sentence
+        clean = split(msg.content, "###\n")[end]
+        strip(clean)
     else
         ""
     end
@@ -181,7 +187,8 @@ function build_clusters!(index::AbstractDocumentIndex; k::Union{Int, Nothing} = 
         verbose && @info "Cutting clusters at k=$k..."
         assignments = cutree(index.clustering; k)
         count_topics = nunique(assignments)
-        topics = asyncmap(i -> build_topic(index,
+        topics = asyncmap(
+            i -> build_topic(index,
                 assignments,
                 i;
                 topic_kwargs...,
@@ -198,7 +205,8 @@ function build_clusters!(index::AbstractDocumentIndex; k::Union{Int, Nothing} = 
         count_topics = nunique(assignments)
         ## early exit to not duplicate work
         count_topics == remember_count_clusters && return index
-        topics = asyncmap(i -> build_topic(index,
+        topics = asyncmap(
+            i -> build_topic(index,
                 assignments,
                 i;
                 topic_kwargs...,
@@ -213,7 +221,8 @@ function build_clusters!(index::AbstractDocumentIndex; k::Union{Int, Nothing} = 
         verbose && @info "Cutting clusters at k=$k..."
         assignments = cutree(index.clustering; k)
         count_topics = nunique(assignments)
-        topics = asyncmap(i -> build_topic(index,
+        topics = asyncmap(
+            i -> build_topic(index,
                 assignments,
                 i;
                 topic_kwargs...,

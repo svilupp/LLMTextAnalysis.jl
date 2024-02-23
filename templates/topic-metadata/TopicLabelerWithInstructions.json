@@ -1,0 +1,24 @@
+[
+    {
+        "content": "Template Metadata",
+        "description": "Advanced labeler for a given topic/theme in 2-5 words based on the provided central text, samples and keywords. It provides a field for special instructions. If you do not have any special instructions, provide `instructions=\"None.\"`. Placeholders: `central_text`, `samples`, `keywords`, `instructions`",
+        "version": "1.0",
+        "source": "",
+        "_type": "metadatamessage"
+    },
+    {
+        "content": "Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.\n\nYour task is create a topic name based on the provided information and sample texts.\n\n**Topic Name Instructions:**\n- A short phrase, ideally 2-5 words.\n- Descriptive of the information provided.\n- Brief and concise.\n- Title Cased.\n\nIf Special Instructions are provided by the user, they take precedence over any previous instructions. You MUST follow the instructions precisely.\n",
+        "variables": [],
+        "_type": "systemmessage"
+    },
+    {
+        "content": "###Central Text###\n{{central_text}}\n\n###Sample Texts###\n{{samples}}\n\n###Common Words###\n{{keywords}}\n\n###Special Instructions###\n{{instructions}}\n\nThe most suitable topic name is:\",\n",
+        "variables": [
+            "central_text",
+            "samples",
+            "keywords",
+            "instructions"
+        ],
+        "_type": "usermessage"
+    }
+]
