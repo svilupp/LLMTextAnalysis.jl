@@ -231,7 +231,7 @@ pl = plot(index; k = 3,
     title = "Sujets d'actualité du 2024-02-13")
 ```
 
-### Difference between labeler_kwargs for `build_clusters!` and `plot`
+### Difference between `labeler_kwargs` for `build_clusters!` and `plot`
 
 So when should I use `build_clusters!` and when should I simply use `plot`?
 
