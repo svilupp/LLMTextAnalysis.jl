@@ -72,7 +72,7 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
         docs_idx = topic.docs_idx
         hover = if add_hover
             extras = if isnothing(hoverdata)
-                fill("", length(scores1))
+                fill("", length(docs_idx))
             else
                 subset = Tables.subset(hoverdata, docs_idx; viewhint = true)
                 map(Tables.rows(subset)) do row
