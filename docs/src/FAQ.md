@@ -161,7 +161,7 @@ index.topic_levels[k][1].label = "Étude du Comportement du Renard et du Chien -
 
 How would we find available templates? `aitemplates("Labeler")`!
 
-We would see the templates with partial match, what they do and the PLACEHOLDERS they require, eg, 
+We would see the templates with a partial match, what they do and the PLACEHOLDERS they require, eg, 
 ```plaintext
 PromptingTools.AITemplateMetadata
   name: Symbol TopicLabelerWithInstructions
@@ -176,7 +176,7 @@ PromptingTools.AITemplateMetadata
 
 ### Example of creating a new template
 
-We first duplicate the `TopicLabelerBasic` template to have a starting point and 2 add two new instructions in section "Topic Name Instructions".
+We first duplicate the `TopicLabelerBasic` template to have a starting point and add two new instructions in the section "Topic Name Instructions".
 
 ```julia
 tpl_custom = [
