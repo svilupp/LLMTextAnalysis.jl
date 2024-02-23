@@ -45,7 +45,10 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
     prepare_plot!(index; verbose)
     ## Prepare a clustering
     previous_topic_levels = keys(index.topic_levels)
-    build_clusters!(index; verbose, k, h, labeler_kwargs, cluster_kwargs...)
+    ## do we need to build clusters for this k?
+    if (isnothing(k) && isnothing(h)) || (!isnothing(k) && !haskey(index.topic_levels, k))
+        build_clusters!(index; verbose, k, h, labeler_kwargs, cluster_kwargs...)
+    end
     ## Pick topic_level if not provided
     topic_level = if !isnothing(k)
         k
@@ -76,8 +79,10 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
             else
                 subset = Tables.subset(hoverdata, docs_idx; viewhint = true)
                 map(Tables.rows(subset)) do row
-                    join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
-                          for col in Tables.columnnames(row)], "<br>")
+                    join(
+                        ["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
+                         for col in Tables.columnnames(row)],
+                        "<br>")
                 end
             end
             ["""
@@ -153,8 +158,10 @@ function Plots.plot(index::AbstractDocumentIndex,
             fill("", length(scores1))
         else
             map(Tables.rows(hoverdata)) do row
-                join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
-                      for col in Tables.columnnames(row)], "<br>")
+                join(
+                    ["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
+                     for col in Tables.columnnames(row)],
+                    "<br>")
             end
         end
         ["""

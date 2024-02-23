@@ -45,7 +45,10 @@ function PlotlyJS.plot(index::AbstractDocumentIndex; verbose::Bool = true,
     prepare_plot!(index; verbose)
     ## Prepare a clustering
     previous_topic_levels = keys(index.topic_levels)
-    build_clusters!(index; verbose, k, h, labeler_kwargs, cluster_kwargs...)
+    ## do we need to build clusters for this k?
+    if (isnothing(k) && isnothing(h)) || (!isnothing(k) && !haskey(index.topic_levels, k))
+        build_clusters!(index; verbose, k, h, labeler_kwargs, cluster_kwargs...)
+    end
     ## Pick topic_level if not provided
     topic_level = if !isnothing(k)
         k
@@ -76,8 +79,10 @@ function PlotlyJS.plot(index::AbstractDocumentIndex; verbose::Bool = true,
                 hovertemplate = "<b>Topic:</b> $(topic.label)<br><b>Text:</b> %{text}<br>%{customdata}<extra></extra>"
                 subset = Tables.subset(hoverdata, docs_idx; viewhint = true)
                 customdata = map(Tables.rows(subset)) do row
-                    join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
-                          for col in Tables.columnnames(row)], "<br>")
+                    join(
+                        ["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
+                         for col in Tables.columnnames(row)],
+                        "<br>")
                 end
             end
         else
@@ -162,8 +167,10 @@ function PlotlyJS.plot(index::AbstractDocumentIndex,
         else
             hovertemplate = "<b>Text:</b> %{text}<br><b>Score #1</b>: %{x}<br><b>Score #2</b>: %{y:,.0%}<br>%{customdata}<extra></extra>"
             customdata = map(Tables.rows(hoverdata)) do row
-                join(["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
-                      for col in Tables.columnnames(row)], "<br>")
+                join(
+                    ["<b>$(col)</b>: $(Tables.getcolumn(row,col))"
+                     for col in Tables.columnnames(row)],
+                    "<br>")
             end
         end
     else

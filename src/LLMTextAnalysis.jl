@@ -10,6 +10,7 @@ using Statistics: mean
 using MLJLinearModels, Tables
 const PT = PromptingTools
 
+export load_templates!
 # export nunique, sigmoid
 include("utils.jl")
 
@@ -30,8 +31,7 @@ include("concept_labeling.jl")
 
 function __init__()
     ## Load extra templates
-    PT.load_templates!() # refresh base templates
-    PT.load_templates!(joinpath(@__DIR__, "..", "templates"); remove_templates = false) # add our custom ones
+    load_templates!()
 end
 
 # TODO: Enable precompilation to reduce start time, disabled logging

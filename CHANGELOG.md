@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.4.0]
+
+### Added
+- Added a new example on topic label customization (`examples/3_customize_topic_labels.jl`) and the corresponding sections in the FAQ.
+- Added a few string cleanup tricks in `build_topic` function to strip unnecessary repetition of the prompt template in the generated labels.
+- Added new templates `TopicLabelerWithInstructions` and `TopicSummarizerWithInstructions` that include the placeholder `instructions` to allow users to easily customize the labels and summaries, respectively.
+
+### Fixed
+- Fixed small typos in templates `TopicLabelerBasic` and `TopicSummarizerBasic`.
+
+## Updated
+- Updated logic in the `plot` to ensure topic labels are generated only when necessary. Use `build_clusters!` to force the generation of topic labels, or `plot` to generate them only if necessary.
+- Increased compatibility for PromptingTools to 0.12.
+
 ## [0.3.2]
 
 ### Fixed
