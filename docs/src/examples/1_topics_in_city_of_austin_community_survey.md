@@ -12,7 +12,7 @@ Necessary imports
 using Downloads, CSV, DataFrames
 using Plots
 using LLMTextAnalysis
-import PlotlyJS, PlotlyDocumenter
+import PlotlyJS, PlotlyDocumenter ## Only for the documentation, not needed for users!
 plotlyjs(); # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
 ````
 
