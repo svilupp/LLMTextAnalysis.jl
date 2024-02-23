@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed small typos in templates `TopicLabelerBasic` and `TopicSummarizerBasic`.
 
-## Updated
+### Updated
 - Updated logic in the `plot` to ensure topic labels are generated only when necessary. Use `build_clusters!` to force the generation of topic labels, or `plot` to generate them only if necessary.
 - Increased compatibility for PromptingTools to 0.12.
 
