@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.0]
 
 ### Added
+- Added a classification function `train_classifier` to train a model to classify documents into a set of predefined labels (as opposed to the more open-ended topic modeling in `build_clusters!`). You can either provide a small set of labeled documents to train the model (that are in the `index`), or just specify the `num_samples` and the LLM model will generate its own training data based on the `labels` and `labels_description` provided.
+- Added a new template `TextWriterFromLabel` to generate synthetic documents for any given label (=topic).
 
 ### Updated
 - Updated to use `PromptingTools` 0.15.
