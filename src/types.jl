@@ -70,6 +70,7 @@ index = DocIndex(docs=docs, embeddings=rand(Float32, (10, 2)), distances=rand(Fl
     id::Symbol = gensym("DocIndex")
     ## documents/document chunks to be embedded
     docs::Vector{T1}
+    sources::Vector{<:AbstractString} = Vector{String}()
     ## embeddings: rows are dimensions, columns are documents
     embeddings::Matrix{Float32}
     distances::Matrix{Float32}
@@ -204,8 +205,61 @@ println("Re-written Documents: ", spectrum.docs) # good for debugging if results
     coeffs::Union{Vector{Float32}, Nothing} = nothing
 end
 
+"""
+    TrainedClassifier
+
+The `TrainedClassifier` struct is used for representing and working with a trained classification model, ie, it selects the most appropriate `label` for a given document.
+
+It encapsulates all the necessary information required to analyze and score documents based on their relevance to a specific concept.
+
+# Fields
+
+- `index_id`: A unique identifier for the `AbstractDocumentIndex` associated with this concept.
+- `source_doc_ids`: Indices of the documents from the `AbstractDocumentIndex` used for training the concept model. Corresponds to `index.docs` if provided.
+- `concept`: The specific concept (as a string) that this model is trained to analyze.
+- `docs`: The collection of rewritten documents, which are modified to reflect the concept.
+- `embeddings`: The embeddings of the rewritten documents, used for training the model. Columns are documents, rows are dimensions.
+- `coeffs`: The coefficients of the trained logistic regression model. Maps to each dimension in `embeddings`.
+
+
+# Example
+
+```julia
+index = build_index(...)
+
+# Training a concept
+concept = train_concept(index, "sustainability")
+
+# Using TrainedConcept for scoring
+scores = score(index, concept)
+# or use it as a functor: `scores = concept(index)`
+
+# Accessing the model details
+println("Concept: ", concept.concept)
+println("Coefficients: ", concept.coeffs)
+println("Source Document IDs: ", concept.source_doc_ids)
+println("Re-written Documents: ", concept.docs) # good for debugging if results are poor
+```
+"""
+@kwdef mutable struct TrainedClassifier
+    index_id::Symbol # source index
+    # optional, list of source document positions in index (if provided)
+    source_doc_ids::Union{Nothing, Vector{Int}} = nothing
+    # what labels we're choosing from
+    labels::Vector{<:AbstractString}
+    labels_description::Union{Vector{<:AbstractString}, Nothing} = nothing
+    # generate docs if not provided from the index
+    docs::Union{AbstractVector{<:AbstractString}, Nothing} = nothing
+    docs_labels::Vector{<:Integer}
+    # embeddings of the generated/provided docs: (embedding_size, num_docs)
+    embeddings::Union{Matrix{Float32}, Nothing} = nothing
+    # trained coefficients for each label -- (embedding_dim,num_labels)
+    coeffs::Union{Matrix{Float32}, Nothing} = nothing
+end
+
 label(obj::TrainedConcept) = "\"$(obj.concept)\""
 label(obj::TrainedSpectrum) = "\"$(obj.spectrum[1])\" vs. \"$(obj.spectrum[2])\""
+label(obj::TrainedClassifier) = "\"Classifier with $(length(obj.labels)) labels\""
 
 function Base.show(io::IO, obj::TrainedConcept)
     (; concept, docs, embeddings, coeffs) = obj
@@ -226,6 +280,17 @@ function Base.show(io::IO, obj::TrainedSpectrum)
     print(io,
         nameof(typeof(obj)),
         "(Spectrum: $(label(obj)), Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
+end
+
+function Base.show(io::IO, obj::TrainedClassifier)
+    (; docs, embeddings, coeffs) = obj
+    docs_str = isnothing(docs) ? "-" : "$(length(docs))"
+    embeddings_str = isnothing(embeddings) ? "-" : "OK"
+    coefficients_str = isnothing(coeffs) ? "-" : "OK"
+
+    print(io,
+        nameof(typeof(obj)),
+        "($(label(obj)), Docs: $docs_str, Embeddings: $embeddings_str, Coeffs: $coefficients_str)")
 end
 
 ## Other

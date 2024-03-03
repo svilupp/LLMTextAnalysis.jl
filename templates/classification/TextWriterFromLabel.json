@@ -1,0 +1,24 @@
+[
+    {
+        "content": "Template Metadata",
+        "description": "Generating a synthetic data sample for a given `label` that matches the provided the context and style of the provided sample. Placeholders: `label`, `sample`",
+        "version": "1.0",
+        "source": "",
+        "_type": "metadatamessage"
+    },
+    {
+        "content": "You're a world-class journalist trained to match any writing style or tone.\n\nYour task is to write a piece of text that will be classified as \"{{label}}\", but which will match the length, style, tone, and context of the provided sample text.\n\nYou always need to imagine what context the provided sample text comes from and what the label means in that context. \nThen, you need to write a piece of text that would be classified as the provided label in that context.\n",
+        "variables": [
+            "label"
+        ],
+        "_type": "systemmessage"
+    },
+    {
+        "content": "###Sample Text###\n{{sample}}\n\n###Label To Match###\n\"{{label}}\"\n\n###Text Matching the Label###\n",
+        "variables": [
+            "sample",
+            "label"
+        ],
+        "_type": "usermessage"
+    }
+]

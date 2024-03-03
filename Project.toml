@@ -1,7 +1,7 @@
 name = "LLMTextAnalysis"
 uuid = "a88142f3-a164-49e9-925a-9408902b6922"
 authors = ["J S <49557684+svilupp@users.noreply.github.com> and contributors"]
-version = "0.4.0"
+version = "0.5.0"
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
@@ -41,7 +41,7 @@ MLJLinearModels = "0.10"
 PlotlyJS = "0.18"
 Plots = "1.35 - 1.40"
 PrecompileTools = "1"
-PromptingTools = "0.12"
+PromptingTools = "0.15"
 Snowball = "0.1.1"
 SparseArrays = "<0.0.1, 1"
 Statistics = "<0.0.1, 1"
