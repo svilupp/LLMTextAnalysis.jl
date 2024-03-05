@@ -1,11 +1,14 @@
 """
-    build_topic(index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
-    topic_level::Int = nunique(assignments),
-    verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
-    label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
-    summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
-    num_samples::Int = 8, num_keywords::Int = 10,
-    cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
+    build_topic(
+        index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
+        topic_level::Union{AbstractString, Int} = nunique(assignments),
+        verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
+        label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
+        label_default::AbstractString = "",
+        summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
+        summary_default::AbstractString = "",
+        num_samples::Int = 8, num_keywords::Int = 10,
+        cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
 
 Builds the metadata for a specific topic in the document index.
 
@@ -19,6 +22,8 @@ Builds the metadata for a specific topic in the document index.
 - `verbose`: Flag to enable INFO logging.
 - `add_label`: Flag to enable topic labeling, ie, call LLM to generate topic label.
 - `add_summary`: Flag to enable topic summarization, ie, call LLM to generate topic summary.
+- `label_default`: Default label to use if no label is generated. It can be used to directly provide a label.
+- `summary_default`: Default summary to use if no summary is generated. It can be used to directly provide a summary.
 - `label_template`: The LLM template to use for topic labeling. See `?aitemplates` for more details on templates.
 - `summary_template`: The LLM template to use for topic summarization. See `?aitemplates` for more details on templates.
 - `num_samples`: Number of diverse samples to show to the LLM for each topic.
@@ -38,10 +43,12 @@ metadata = build_topic(index, assignments, 1)
 """
 function build_topic(
         index::AbstractDocumentIndex, assignments::Vector{Int}, topic_idx::Int;
-        topic_level::Int = nunique(assignments),
+        topic_level::Union{AbstractString, Int} = nunique(assignments),
         verbose::Bool = false, add_label::Bool = true, add_summary::Bool = false,
         label_template::Union{Nothing, Symbol} = :TopicLabelerBasic,
+        label_default::AbstractString = "",
         summary_template::Union{Nothing, Symbol} = :TopicSummarizerBasic,
+        summary_default::AbstractString = "",
         num_samples::Int = 8, num_keywords::Int = 10,
         cost_tracker::Union{Nothing, Threads.Atomic{Float64}} = nothing, aikwargs...)
     @assert topic_idx ∈ assignments "Topic index $topic_idx not found in assignments!"
@@ -58,7 +65,7 @@ function build_topic(
 
     # Extract top_k keywords
     if num_keywords > 0 && !isempty(keywords_ids)
-        sum_weights = sum(keywords_ids, dims = 2) |> vec
+        sum_weights = sum(@view(keywords_ids[:, docs_idx]), dims = 2) |> vec
         keywords_idx = first(sortperm(sum_weights, rev = true), num_keywords)
         keywords = join(@view(keywords_vocab[keywords_idx]), ", ")
     else
@@ -103,7 +110,7 @@ function build_topic(
         clean = split(clean, "topic name is:")[end]
         strip(clean)
     else
-        ""
+        label_default
     end
     summary = if add_summary && !isnothing(summary_template)
         # TODO: check the template if it has all the valid placeholders
@@ -119,7 +126,7 @@ function build_topic(
         clean = split(msg.content, "###\n")[end]
         strip(clean)
     else
-        ""
+        summary_default
     end
 
     return TopicMetadata(;
@@ -233,4 +240,100 @@ function build_clusters!(index::AbstractDocumentIndex; k::Union{Int, Nothing} = 
         index.topic_levels[count_topics] = topics
     end
     return index
+end
+
+# General dispatch for adding custom topics
+"""
+    build_clusters!(index::AbstractDocumentIndex, assignments::Vector{Int};
+        labels::Union{Vector{String}, Nothing} = nothing,
+        verbose::Bool = true, add_label::Bool = false, add_summary::Bool = false,
+        labeler_kwargs::NamedTuple = NamedTuple())
+
+Builds custom topics based on the provided `labels` and `assignments` (vector of which topic each document `index` belongs to).
+
+# Arguments
+- `index`: The document index.
+- `assignments`: Vector of topic assignments for each document (eg, `[2,3]` -> first document will be assigned to topic 2, second document will be assigned to topic 3).
+- `labels`: Vector of labels for each topic if known. Otherwise, can be generated if you set `add_label=true`.
+- `verbose`: Flag to enable INFO logging.
+- `add_label`: Flag to enable topic labeling, ie, call LLM to generate topic label.
+- `add_summary`: Flag to enable topic summarization, ie, call LLM to generate topic summary.
+- `labeler_kwargs`: Keyword arguments to pass to the LLM labeler. See `?build_topic` for more details on available arguments.
+
+# Example
+```julia
+
+```
+"""
+function build_clusters!(index::AbstractDocumentIndex, assignments::Vector{Int};
+        topic_level::AbstractString = "",
+        labels::Union{Vector{String}, Nothing} = nothing,
+        verbose::Bool = true, add_label::Bool = false, add_summary::Bool = false,
+        labeler_kwargs::NamedTuple = NamedTuple())
+    ## 
+    @assert length(assignments)==length(index.docs) "Length of `assignments` must match the number of documents in the index."
+    @assert isnothing(labels)||(nunique(assignments) <= length(labels)) "There must be at least as many labels as unique topics in `assignments`."
+
+    ## fill the labels if not provided
+    labels = isnothing(labels) ? fill("", maximum(assignments)) : labels
+
+    ## Check if the topic level name is provided
+    if isempty(topic_level)
+        ## Generate a unique label
+        topic_level = "Custom_$(length(cls.labels))"
+        conflict = haskey(index.topic_levels, topic_level)
+        topic_level = if conflict
+            i = 1
+            # max 20 attempts
+            while conflict || i <= 20
+                test_topic_level = "$(topic_level)_$(i)"
+                conflict = haskey(index.topic_levels, test_topic_level)
+                i += 1
+            end
+            test_topic_level
+        else
+            topic_level
+        end
+        verbose &&
+            @info "`topic_level` name not provided. Will use autogenerated label `$topic_level`"
+    end
+
+    ## Build the topics
+    topic_kwargs = (;
+        verbose = false,
+        add_label,
+        add_summary,
+        labeler_kwargs...)
+    topics = [build_topic(index, assignments, i;
+                  topic_level = topic_level, label_default = label,
+                  topic_kwargs...) for (i, label) in enumerate(labels)]
+
+    ## Save the topics
+    verbose && haskey(index.topic_levels, topic_level) &&
+        @warn "Overwriting clusters in topic level $topic_level"
+    index.topic_levels[topic_level] = topics
+
+    verbose &&
+        @info "Done building `$topic_level` topics."
+
+    return index
+end
+
+# Dispatch for a classifier
+"""
+    build_clusters!(index::AbstractDocumentIndex, cls::TrainedClassifier;
+        topic_level::AbstractString = "",
+        verbose::Bool = true, add_label::Bool = false, add_summary::Bool = false,
+        labeler_kwargs::NamedTuple = NamedTuple())
+
+Builds topics based on the classifier's labels and labels all documents in the `index` with the highest probability label.
+"""
+function build_clusters!(index::AbstractDocumentIndex, cls::TrainedClassifier;
+        topic_level::AbstractString = "",
+        verbose::Bool = true, add_label::Bool = false, add_summary::Bool = false,
+        labeler_kwargs::NamedTuple = NamedTuple())
+    ## Score all documents on which label they are closest to
+    assignments = argmax(cls(index), dims = 2) |> vec |> x -> map(i -> i[2], x)
+    build_clusters!(index, assignments; cls.labels,
+        topic_level, verbose, add_label, add_summary, labeler_kwargs)
 end

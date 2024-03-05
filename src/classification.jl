@@ -228,6 +228,7 @@ To pick the best label for each document, you can use `argmax(scores, dims=2)`.
 # Arguments
 - `index::AbstractDocumentIndex`: The index containing the documents to be scored.
 - `classifier::TrainedClassifier`: The trained classifier model used for scoring.
+- `return_labels::Bool` (optional): If `true`, returns the most probable labels instead of the scores. Defaults to `false`.
 - `check_index::Bool` (optional): If `true`, checks for index ID matching between the provided index and the one used in the classifier training. Defaults to `true`.
 
 # Returns
@@ -245,17 +246,32 @@ scores = score(index, classifier)
 label_ids = argmax(scores, dims = 2) |> vec |> x -> map(i -> i[2], x)
 best_labels = classifier.labels[label_ids]
 ```
+
+Or, instead, you can simply provide `return_labels=true` to get the best labels directly:
+```julia
+score(index, classifier; return_labels = true)
+```
+
 """
 function score(index::AbstractDocumentIndex,
         classifier::TrainedClassifier;
+        return_labels::Bool = false,
         check_index::Bool = true)
     # Check if the classifier is properly trained
     @assert !isempty(classifier.coeffs) "The classifier is not trained. Coefficients are missing. Use `train!`."
     if check_index && index.id != classifier.index_id
         @warn "Potential error: Index ID mismatch! (Provided Index: $(index.id), Used for training: $(classifier.index_id))"
     end
-    # scores between 0 and 1
-    return softmax(index.embeddings' * classifier.coeffs)
+    # scores between 0 and 1, each row corresponds to a document, each column to a label (each row sums up to 1!)
+    probas = softmax(index.embeddings' * classifier.coeffs)
+    if return_labels
+        ## Find the highest probability label, extract the column position from the CartesianIndex(1,3) -> 3
+        label_ids = argmax(probas, dims = 2) |> vec |> x -> map(
+                        i -> i[2], x)
+        classifier.labels[label_ids]
+    else
+        probas
+    end
 end
 
 """
@@ -274,6 +290,7 @@ To pick the best label for each document, you can use `argmax(scores, dims=2)`.
 
 # Arguments
 - `index::AbstractDocumentIndex`: The index containing the documents to be scored.
+- `return_labels::Bool` (optional): If `true`, returns the most probable labels instead of the scores. Defaults to `false`.
 - `check_index::Bool` (optional): If `true`, performs a check to ensure that the index ID matches the one used in the classifier training. Defaults to `true`.
 
 # Returns
@@ -287,13 +304,13 @@ scores = classifier(index)
 
 Pick the highest scoring label for each document:
 ```julia
-scores = score(index, classifier)
-label_ids = argmax(scores, dims = 2) |> vec |> x -> map(i -> i[2], x)
-best_labels = classifier.labels[label_ids]
+best_labels = score(index, classifier; return_labels = true)
 ```
+
 This method provides a convenient and intuitive way to apply a trained classifier model to a document index for scoring.
 """
 function (classifier::TrainedClassifier)(
-        index::AbstractDocumentIndex; check_index::Bool = true)
-    return score(index, classifier; check_index)
+        index::AbstractDocumentIndex;
+        return_labels::Bool = false, check_index::Bool = true)
+    return score(index, classifier; return_labels, check_index)
 end

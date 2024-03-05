@@ -15,16 +15,12 @@ export load_templates!
 # export nunique, sigmoid, softmax
 include("utils.jl")
 
-export DocIndex, TopicMetadata, TrainedConcept, TrainedSpectrum
+export DocIndex, TopicMetadata, TrainedConcept, TrainedSpectrum, topic_levels
 include("types.jl")
 
 export build_index, prepare_plot!
 # export build_keywords
 include("preparation.jl")
-
-export build_clusters!
-# export build_topic
-include("topic_modelling.jl")
 
 export cross_validate_accuracy, train_spectrum, train_concept, score
 # export create_folds
@@ -32,6 +28,10 @@ include("concept_labeling.jl")
 
 export train_classifier
 include("classification.jl")
+
+export build_clusters!
+# export build_topic
+include("topic_modelling.jl")
 
 function __init__()
     ## Load extra templates

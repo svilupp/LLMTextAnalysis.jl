@@ -29,9 +29,7 @@ docs = df[!, col] |> skipmissing |> collect;
 # Index the documents (ie, embed them)
 index = build_index(docs)
 
-using PromptingTools
-const PT = PromptingTools
-using LLMTextAnalysis.MLJLinearModels
+## Temporary for efficiency:
 using Serialization
 fn = "examples/_index.jls"
 if isfile(fn)
@@ -70,10 +68,14 @@ cls = train_classifier(index, labels; docs_ids, docs_labels)
 
 # Get scores for all documents
 scores = score(index, cls)
+# Note: Watch out for scores around `1/number_of_labels` - it means the classifier is not very confident about the classification
 
 # Best label for each document
 label_ids = argmax(scores, dims = 2) |> vec |> x -> map(i -> i[2], x)
 best_labels = cls.labels[label_ids]
+
+# Or do it in one line with `return_labels=true`
+best_labels = score(index, cls; return_labels = true)
 
 # ### Classification Without Labeled Examples
 # When we don't have any examples, we can ask an AI model to generate some potential examples for us.
@@ -92,5 +94,18 @@ cls = train_classifier(index, labels; labels_description)
 scores = score(index, cls)
 
 # Best label for each document
-label_ids = argmax(scores, dims = 2) |> vec |> x -> map(i -> i[2], x)
-best_labels = cls.labels[label_ids]
+best_labels = score(index, cls; return_labels = true)
+
+# ## Adding Custom Topic Level to the Index
+
+# Let's say we want to add a custom topic level to the index.
+# We can do it by providing the `cls` to the function `build_clusters!`.
+
+build_clusters!(index, cls; topic_level = "MyClusters")
+# Note: If not `topic_level` is provided, it will default to "Custom_1".
+
+# Check what topic_levels are available
+topic_levels(index) |> keys
+
+# Let's plot it
+plot!(index; topic_level = "MyClusters", title = "My Custom Clusters")
