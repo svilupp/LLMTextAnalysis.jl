@@ -6,15 +6,18 @@ using LLMTextAnalysis: AbstractDocumentIndex, label, wrap_string
 
 """
     Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
+        topic_level::Union{Nothing, Int, AbstractString} = nothing,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
-        add_hover::Bool = true,  hoverdata = nothing, cluster_kwargs::NamedTuple = NamedTuple(),
+        add_hover::Bool = true, hoverdata = nothing,
+        cluster_kwargs::NamedTuple = NamedTuple(),
         labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
 
 Generates a scatter plot of the document embeddings, colored by topic assignments.
 
 # Arguments
 - `index`: The document index.
+- `topic_level`: The level of the topic hierarchy to use. If not provided, the highest new level of clustering will be used. Similar to `k` for auto-generated topics.
 - `k`: The number of clusters to build. If not provided, the highest new level of clustering will be used.
 - `h`: The height at which to cut the dendrogram. Defaults to nothing.
 - `text_width`: The width of the text in the hover tooltip. If the document exceeds this width, it will be wrapped on new lines.
@@ -34,6 +37,7 @@ pl = plot(index)
 ```
 """
 function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
+        topic_level::Union{Nothing, Int, AbstractString} = nothing,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
         add_hover::Bool = true, hoverdata = nothing,
@@ -46,12 +50,18 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
     ## Prepare a clustering
     previous_topic_levels = keys(index.topic_levels)
     ## do we need to build clusters for this k?
-    if (isnothing(k) && isnothing(h)) || (!isnothing(k) && !haskey(index.topic_levels, k))
+    if (isnothing(topic_level) && isnothing(k) && isnothing(h)) ||
+       (!isnothing(k) && !haskey(index.topic_levels, k)) ||
+       (!isnothing(h) && !haskey(index.topic_levels, h))
         build_clusters!(index; verbose, k, h, labeler_kwargs, cluster_kwargs...)
     end
     ## Pick topic_level if not provided
     topic_level = if !isnothing(k)
         k
+    elseif !isnothing(h)
+        h
+    elseif !isnothing(topic_level)
+        topic_level
     else
         ## we don't know the exact `k`, so let pick the highest new one
         new_topics = setdiff(keys(index.topic_levels), previous_topic_levels)
@@ -62,6 +72,7 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
             maximum(new_topics)
         end
     end
+    @assert haskey(index.topic_levels, topic_level) "No topics found for the requested `topic_level`."
 
     ## Plot
     (; plot_data) = index

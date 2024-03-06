@@ -176,6 +176,56 @@ PromptingTools.AITemplateMetadata
 
 ### Example of creating a new template
 
+There is a simpler way to create a new template and immediately load it. 
+You can use the `PT.create_template(; user="..", system="..", load_as="..")` to create and load a template in a single function call.
+
+Example:
+
+```julia
+tpl = PT.create_template(;
+    system = """
+Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.
+
+Your task is create a topic name based on the provided information and sample texts.
+
+**Topic Name Instructions:**
+- A short phrase, ideally 2-5 words.
+- Descriptive of the information provided.
+- Brief and concise.
+- Title Cased.
+- Must be in French.
+- Must be a question.
+""",
+    user = """
+    ###Central Text###
+    {{central_text}}
+
+    ###Sample Texts###
+    {{samples}}
+
+    ###Common Words###
+    {{keywords}}
+
+    The most suitable topic name is:""",
+    load_as = "MyTopicLabels");
+```
+
+You could inspect that `tpl` is a vector of UserMessage and SystemMessage, but it's not necessary. We can use it directly in `build_clusters!` or `plot` as `label_template = :MyTopicLabels`.
+
+```julia
+build_clusters!(
+    index; k = 3, labeler_kwargs = (; label_template = :MyTopicLabels, model = "gpt3t"))
+pl = plot(index; k = 3,
+    title = "Sujets d'actualité du 2024-02-13")
+```
+
+If you want to understand what `create_template` does under-the-hood, follow this step by step walkthrough below.
+
+Note: Templates created with `create_template` are NOT saved in the `templates` and they will disappear after your restart REPL.
+If you want to save it in your project permanently, use `PT.save_template` as shown in the next example.
+
+Let's now create a new template from scratch without the `create_template` function.
+
 We first duplicate the `TopicLabelerBasic` template to have a starting point and add two new instructions in the section "Topic Name Instructions".
 
 ```julia

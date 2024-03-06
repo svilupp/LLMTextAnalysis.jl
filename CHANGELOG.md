@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.5.0]
+
+### Added
+- Added a classification function `train_classifier` to train a model to classify documents into a set of predefined labels (as opposed to the more open-ended topic modeling in `build_clusters!`). You can either provide a small set of labeled documents to train the model (that are in the `index`), or just specify the `num_samples` and the LLM model will generate its own training data based on the `labels` and `labels_description` provided.
+- Added a new template `TextWriterFromLabel` to generate synthetic documents for any given label (=topic).
+- Added methods for `build_clusters!` to add custom topic levels, eg, from a `TrainedClassifier` (`build_clusters!(index,cls; topic_level="MyTopics")`) or directly via providing a vector of document `assignments` (`build_clusters!(index, assignments; topic_level="MyTopics")`). The convention is to use `topic_level::Integer` for auto-generated topics, and `topic_level::String` for custom topics.
+
+### Updated
+- Updated to use `PromptingTools` 0.15.
+
+### Fixed
+- Fixed a bug where `keywords` were not properly filtered before being provided to the auto-labeling function.
+
 ## [0.4.0]
 
 ### Added

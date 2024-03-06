@@ -1,14 +1,12 @@
 # # Example 3: Customize Topic Labels
 # The focus of this tutorial is how to customize the topic labels in the plot.
 # 
-# For this tutorial, we will use the [City of Austin's Community Survey](https://data.austintexas.gov/Health-and-Community-Services/2019-City-of-Austin-Community-Survey/s2py-ceb7).
-# We will pick one open-ended question and extract the main themes from the answers.
-
 # Necessary imports
 using Downloads, CSV, DataFrames
 using Plots
 using LLMTextAnalysis
-##PLOTLYJS##
+using PromptingTools
+const PT = PromptingTools # for the templating functionality
 plotlyjs(); # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
 
 # ## Customizing Topic Labels
@@ -91,7 +89,49 @@ index.topic_levels[k][1].label = "Étude du Comportement du Renard et du Chien -
 ##   user_preview: String "###Central Text###\n{{central_text}}\n\n###Sample Texts###\n{{samples}}\n\n###Common Words###\n{{keywords}}"
 ##   source: String ""
 
-# ## Example of creating a new template
+# ## Example of creating a new template - the easy way
+# There is a simpler way to create a new template. You can use the `PT.create_template(; user="..", system="..", load_as="..")` to create and load a template in a single function call.
+#
+# Example:
+tpl = PT.create_template(;
+    system = """
+Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.
+
+Your task is create a topic name based on the provided information and sample texts.
+
+**Topic Name Instructions:**
+- A short phrase, ideally 2-5 words.
+- Descriptive of the information provided.
+- Brief and concise.
+- Title Cased.
+- Must be in French.
+- Must be a question.
+""",
+    user = """
+    ###Central Text###
+    {{central_text}}
+
+    ###Sample Texts###
+    {{samples}}
+
+    ###Common Words###
+    {{keywords}}
+
+    The most suitable topic name is:""",
+    load_as = "MyTopicLabels");
+
+# You could inspect that tpl is a vector of UserMessage and SystemMessage, but it's not necessary. We can use it directly in `build_clusters!` or `plot` as `label_template = :MyTopicLabels`.
+build_clusters!(
+    index; k = 3, labeler_kwargs = (; label_template = :MyTopicLabels, model = "gpt3t"))
+pl = plot(index; k = 3,
+    title = "Sujets d'actualité du 2024-02-13")
+
+# If you want to understand what `create_template` does under-the-hood, follow this step by step walkthrough below.
+#
+# Note: Templates created with `create_template` are NOT saved in the `templates` and they will disappear after your restart REPL.
+# If you want to save it in your project permanently, use `PT.save_template` as shown in the next example.
+
+# ## Example of creating a new template - the long way
 
 # We first duplicate the `TopicLabelerBasic` template to have a starting point and 2 add two new instructions in section "Topic Name Instructions".
 
@@ -119,9 +159,8 @@ Your task is create a topic name based on the provided information and sample te
     ###Common Words###
     {{keywords}}
 
-    The most suitable topic name is:",
-    """)]
-filename = joinpath("templates",
+    The most suitable topic name is:""")]
+filename = joinpath(pkgdir(LLMTextAnalysis), "templates",
     "topic-metadata",
     "MyTopicLabels.json")
 PT.save_template(filename,

@@ -140,7 +140,8 @@ end
     # Clustering Already Exists: Ensure existing clustering is used if present
     index = DocIndex(; docs, embeddings, distances,
         keywords_ids = ones(2, 4), keywords_vocab = ["document", "text"],
-        topic_levels = Dict(2 => fill(TopicMetadata(;
+        topic_levels = Dict{Union{Int64, AbstractString}, Vector{TopicMetadata}}(2 => fill(
+            TopicMetadata(;
                 index_id = :x,
                 topic_idx = 1,
                 topic_level = 2),
