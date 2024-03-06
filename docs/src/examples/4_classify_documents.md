@@ -244,7 +244,7 @@ KeySet for a Dict{Union{Int64, AbstractString}, Vector{TopicMetadata}} with 1 en
 
 Whether you have auto-generated topics or custom topics, you can plot them with `plot` by leveraging the keyword argument `topic_level`.
 
-Let's our clusters:
+Let's plot our clusters:
 
 ````julia
 PlotlyJS.plot(index; topic_level = "MyClusters", title = "My Custom Clusters")
