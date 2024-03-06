@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Example 3: Customize Topic Labels · LLMTextAnalysis.jl</title><meta name="title" content="Example 3: Customize Topic Labels · LLMTextAnalysis.jl"/><meta property="og:title" content="Example 3: Customize Topic Labels · LLMTextAnalysis.jl"/><meta property="twitter:title" content="Example 3: Customize Topic Labels · LLMTextAnalysis.jl"/><meta name="description" content="Documentation for LLMTextAnalysis.jl."/><meta property="og:description" content="Documentation for LLMTextAnalysis.jl."/><meta property="twitter:description" content="Documentation for LLMTextAnalysis.jl."/><meta property="og:url" content="https://svilupp.github.io/LLMTextAnalysis.jl/examples/3_customize_topic_labels/"/><meta property="twitter:url" content="https://svilupp.github.io/LLMTextAnalysis.jl/examples/3_customize_topic_labels/"/><link rel="canonical" href="https://svilupp.github.io/LLMTextAnalysis.jl/examples/3_customize_topic_labels/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">LLMTextAnalysis.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../1_topics_in_city_of_austin_community_survey/">Explore Topics in Your Documents</a></li><li><a class="tocitem" href="../2_concept_labeling_in_city_of_austin_community_survey/">Look for specific Concept/Spectrum</a></li></ul></li><li><a class="tocitem" href="../../FAQ/">F.A.Q.</a></li><li><a class="tocitem" href="../../api_reference/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Example 3: Customize Topic Labels</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Example 3: Customize Topic Labels</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/svilupp/LLMTextAnalysis.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/svilupp/LLMTextAnalysis.jl/blob/main/examples/3_customize_topic_labels.jl#" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Example-3:-Customize-Topic-Labels"><a class="docs-heading-anchor" href="#Example-3:-Customize-Topic-Labels">Example 3: Customize Topic Labels</a><a id="Example-3:-Customize-Topic-Labels-1"></a><a class="docs-heading-anchor-permalink" href="#Example-3:-Customize-Topic-Labels" title="Permalink"></a></h1><p>The focus of this tutorial is how to customize the topic labels in the plot.</p><p>Necessary imports</p><pre><code class="language-julia hljs">using Downloads, CSV, DataFrames
+import PlotlyJS, PlotlyDocumenter  ## Only for the documentation, not needed for users!
+using LLMTextAnalysis
+using PromptingTools
+const PT = PromptingTools # for the templating functionality</code></pre><pre><code class="nohighlight hljs">PromptingTools</code></pre><h2 id="Customizing-Topic-Labels"><a class="docs-heading-anchor" href="#Customizing-Topic-Labels">Customizing Topic Labels</a><a id="Customizing-Topic-Labels-1"></a><a class="docs-heading-anchor-permalink" href="#Customizing-Topic-Labels" title="Permalink"></a></h2><p>The topic labels are generated via a &quot;template&quot; (keyword argument <code>label_template</code> for the labeling function).</p><p>We default to &quot;TopicLabelerBasic&quot; (saved in <code>templates/topic-metadata/TopicLabelerBasic.jl</code>), but you can change the template and pass it to <code>build_clusters!()</code> or <code>PlotlyJS.plot()</code> via the <code>labeler_kwargs</code> keyword argument (eg, <code>labeler_kwargs = (; label_template=:MyTopicLabels)</code>).</p><p>Why use the templates? We need to guarantee that you provide placeholders for <code>central_text</code>, <code>samples</code> and <code>keywords</code> in your template for everything to work, so we cannot simply accept any user-provided string.</p><p>Depending on how radically different your labels need to be, you have two choices:</p><ol><li>for smaller changes, use <code>instructions</code> placeholder in the <code>TopicLabelerWithInstructions</code> template. You should always start with this one.</li><li>for larger changes, you can create a new template, save it, load it to your template store and pass it to <code>labeler_kwargs</code> as mentioned above.</li></ol><h2 id="Prepare-the-data-and-index"><a class="docs-heading-anchor" href="#Prepare-the-data-and-index">Prepare the data and index</a><a id="Prepare-the-data-and-index-1"></a><a class="docs-heading-anchor-permalink" href="#Prepare-the-data-and-index" title="Permalink"></a></h2><p>Our setup - let&#39;s say we need our labels to be in French because our documents are.</p><p>Note: I don&#39;t speak French, so apologies for any mistakes or NSFW content below</p><pre><code class="language-julia hljs">french_sentences = [
+    &quot;Bonjour, comment ça va?&quot;,
+    &quot;Je m&#39;appelle Marie.&quot;,
+    &quot;Il fait beau aujourd&#39;hui.&quot;,
+    &quot;Quel est ton plat préféré?&quot;,
+    &quot;J&#39;adore voyager dans le monde.&quot;,
+    &quot;As-tu vu ce film?&quot;,
+    &quot;A quelle heure est le rendez-vous?&quot;,
+    &quot;Les chats sont mignons.&quot;,
+    &quot;Tu veux sortir ce soir?&quot;,
+    &quot;C&#39;est délicieux!&quot;,
+    &quot;Où se trouve la bibliothèque?&quot;,
+    &quot;Tu parles plusieurs langues?&quot;,
+    &quot;J&#39;aime écouter de la musique.&quot;,
+    &quot;Quel est ton sport préféré?&quot;,
+    &quot;Il est tard, tu devrais dormir.&quot;,
+    &quot;Quel temps fait-il demain?&quot;,
+    &quot;Je suis très fatigué.&quot;,
+    &quot;C&#39;est une bonne idée.&quot;,
+    &quot;Tu me manques.&quot;,
+    &quot;Il faut rester positif.&quot;
+]</code></pre><pre><code class="nohighlight hljs">20-element Vector{String}:
+ &quot;Bonjour, comment ça va?&quot;
+ &quot;Je m&#39;appelle Marie.&quot;
+ &quot;Il fait beau aujourd&#39;hui.&quot;
+ &quot;Quel est ton plat préféré?&quot;
+ &quot;J&#39;adore voyager dans le monde.&quot;
+ &quot;As-tu vu ce film?&quot;
+ &quot;A quelle heure est le rendez-vous?&quot;
+ &quot;Les chats sont mignons.&quot;
+ &quot;Tu veux sortir ce soir?&quot;
+ &quot;C&#39;est délicieux!&quot;
+ &quot;Où se trouve la bibliothèque?&quot;
+ &quot;Tu parles plusieurs langues?&quot;
+ &quot;J&#39;aime écouter de la musique.&quot;
+ &quot;Quel est ton sport préféré?&quot;
+ &quot;Il est tard, tu devrais dormir.&quot;
+ &quot;Quel temps fait-il demain?&quot;
+ &quot;Je suis très fatigué.&quot;
+ &quot;C&#39;est une bonne idée.&quot;
+ &quot;Tu me manques.&quot;
+ &quot;Il faut rester positif.&quot;</code></pre><p>Index as usual</p><pre><code class="language-julia hljs">index = build_index(french_sentences)</code></pre><pre><code class="nohighlight hljs">DocIndex(Documents: 20, PlotData: None, Topic Levels: None)</code></pre><h2 id="Example-of-using-TopicLabelerWithInstructions"><a class="docs-heading-anchor" href="#Example-of-using-TopicLabelerWithInstructions">Example of using <code>TopicLabelerWithInstructions</code></a><a id="Example-of-using-TopicLabelerWithInstructions-1"></a><a class="docs-heading-anchor-permalink" href="#Example-of-using-TopicLabelerWithInstructions" title="Permalink"></a></h2><p>We need to change the label template to <code>TopicLabelerWithInstructions</code> and provide the instructions in the <code>labeler_kwargs</code> argument.</p><pre><code class="language-julia hljs">build_clusters!(
+    index; k = 3,
+    labeler_kwargs = (; label_template = :TopicLabelerWithInstructions,
+        instructions = &quot;All topic names must be translated to French.&quot;, model = &quot;gpt3t&quot;))</code></pre><pre><code class="nohighlight hljs">DocIndex(Documents: 20, PlotData: None, Topic Levels: 3)</code></pre><p>Let&#39;s check the labels (3 refers to the number of clusters)</p><pre><code class="language-julia hljs">k = 3
+index.topic_levels[k]
+# 3-element Vector{TopicMetadata}:
+#  TopicMetadata(ID: 1/3, Documents: 1, Label: &quot;Étude du Comportement du Renard et du Chien&quot;,  Summary: -)
+#  TopicMetadata(ID: 2/3, Documents: 3, Label: &quot;Économie Financière Comportementale&quot;,  Summary: -)
+#  TopicMetadata(ID: 3/3, Documents: 16, Label: &quot;Les Proverbes de la Vie&quot;,  Summary: -)</code></pre><pre><code class="nohighlight hljs">3-element Vector{TopicMetadata}:
+ TopicMetadata(ID: 1/3, Documents: 13, Label: &quot;Exploration des Conversations Françaises&quot;,  Summary: -)
+ TopicMetadata(ID: 2/3, Documents: 5, Label: &quot;Météo et Émotions&quot;,  Summary: -)
+ TopicMetadata(ID: 3/3, Documents: 2, Label: &quot;&quot;Compréhension des Questions en Français&quot;&quot;,  Summary: -)</code></pre><p>Note: I don&#39;t speak French, so I&#39;m not sure if the labels are correct. It might take some tweaking of the instructions to get the labels right.</p><p>If needed, you can always tweak the labels manually</p><pre><code class="language-julia hljs">index.topic_levels[k][1].label = &quot;Étude du Comportement du Renard et du Chien - 123456789&quot;</code></pre><pre><code class="nohighlight hljs">&quot;Étude du Comportement du Renard et du Chien - 123456789&quot;</code></pre><p>How would we find available templates? <code>aitemplates(&quot;Labeler&quot;)</code>!</p><p>We would see the templates with partial match, what they do and the PLACEHOLDERS they require, eg,</p><pre><code class="language-julia hljs"># PromptingTools.AITemplateMetadata
+#   name: Symbol TopicLabelerWithInstructions
+#   description: String &quot;Advanced labeler for a given topic/theme in 2-5 words based on the provided central text, samples and keywords. It provides a field for special instructions. If you do not have any special instructions, provide `instructions=\&quot;None.\&quot;`. Placeholders: `central_text`, `samples`, `keywords`, `instructions`&quot;
+#   version: String &quot;1.0&quot;
+#   wordcount: Int64 653
+#   variables: Array{Symbol}((4,))
+#   system_preview: String &quot;Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.\n&quot;
+#   user_preview: String &quot;###Central Text###\n{{central_text}}\n\n###Sample Texts###\n{{samples}}\n\n###Common Words###\n{{keywords}}&quot;
+#   source: String &quot;&quot;</code></pre><h2 id="Example-of-creating-a-new-template-the-easy-way"><a class="docs-heading-anchor" href="#Example-of-creating-a-new-template-the-easy-way">Example of creating a new template - the easy way</a><a id="Example-of-creating-a-new-template-the-easy-way-1"></a><a class="docs-heading-anchor-permalink" href="#Example-of-creating-a-new-template-the-easy-way" title="Permalink"></a></h2><p>There is a simpler way to create a new template. You can use the <code>PT.create_template(; user=&quot;..&quot;, system=&quot;..&quot;, load_as=&quot;..&quot;)</code> to create and load a template in a single function call.</p><p>Example:</p><pre><code class="language-julia hljs">tpl = PT.create_template(;
+    system = &quot;&quot;&quot;
+Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.
+
+Your task is create a topic name based on the provided information and sample texts.
+
+**Topic Name Instructions:**
+- A short phrase, ideally 2-5 words.
+- Descriptive of the information provided.
+- Brief and concise.
+- Title Cased.
+- Must be in French.
+- Must be a question.
+&quot;&quot;&quot;,
+    user = &quot;&quot;&quot;
+    ###Central Text###
+    {{central_text}}
+
+    ###Sample Texts###
+    {{samples}}
+
+    ###Common Words###
+    {{keywords}}
+
+    The most suitable topic name is:&quot;&quot;&quot;,
+    load_as = &quot;MyTopicLabels&quot;);</code></pre><pre><code class="nohighlight hljs">┌ Warning: Template MyTopicLabels already exists, overwriting!
+└ @ PromptingTools ~/.julia/packages/PromptingTools/KF3MT/src/templates.jl:471
+</code></pre><p>You could inspect that tpl is a vector of UserMessage and SystemMessage, but it&#39;s not necessary. We can use it directly in <code>build_clusters!</code> or <code>plot</code> as <code>label_template = :MyTopicLabels</code>.</p><pre><code class="language-julia hljs">build_clusters!(
+    index; k = 3, labeler_kwargs = (; label_template = :MyTopicLabels, model = &quot;gpt3t&quot;))
+pl = PlotlyJS.plot(index; k = 3,
+    title = &quot;Sujets d&#39;actualité du 2024-02-13&quot;)</code></pre><div
+    class="webio-mountpoint"
+    data-webio-mountpoint="5878740521163038321"
+>
+    <script>
+    (function(){
+    // Some integrations (namely, IJulia/Jupyter) use an alternate render pathway than
+    // just putting the html on the page. If WebIO isn't defined, then it's pretty likely
+    // that we're in one of those situations and the integration just isn't installed
+    // correctly.
+    if (typeof window.WebIO === "undefined") {
+        document
+            .querySelector('[data-webio-mountpoint="5878740521163038321"]')
+            .innerHTML = (
+                '<div style="padding: 1em; background-color: #f8d6da; border: 1px solid #f5c6cb; font-weight: bold;">' +
+                '<p><strong>WebIO not detected.</strong></p>' +
+                '<p>Please read ' +
+                '<a href="https://juliagizmos.github.io/WebIO.jl/latest/troubleshooting/not-detected/" target="_blank">the troubleshooting guide</a> ' +
+                'for more information on how to resolve this issue.</p>' +
+                '<p><a href="https://juliagizmos.github.io/WebIO.jl/latest/troubleshooting/not-detected/" target="_blank">https://juliagizmos.github.io/WebIO.jl/latest/troubleshooting/not-detected/</a></p>' +
+                '</div>'
+            );
+        return;
+    }
+    WebIO.mount(
+        document.querySelector('[data-webio-mountpoint="5878740521163038321"]'),
+        {"props":{},"nodeType":"Scope","type":"node","instanceArgs":{"imports":{"data":[{"name":"Plotly","type":"js","url":"\/assetserver\/46b0af2f03ca323adf531facbdab5be59e805cc6-plotly.min.js"},{"name":null,"type":"js","url":"\/assetserver\/103980130ce5b799e931b7ec1b8ad89411b10e20-plotly_webio.bundle.js"}],"type":"async_block"},"id":"10289561463356047098","handlers":{"_toImage":["(function (options){return this.Plotly.toImage(this.plotElem,options).then((function (data){return WebIO.setval({\"name\":\"image\",\"scope\":\"10289561463356047098\",\"id\":\"75\",\"type\":\"observable\"},data)}))})"],"__get_gd_contents":["(function (prop){prop==\"data\" ? (WebIO.setval({\"name\":\"__gd_contents\",\"scope\":\"10289561463356047098\",\"id\":\"76\",\"type\":\"observable\"},this.plotElem.data)) : undefined; return prop==\"layout\" ? (WebIO.setval({\"name\":\"__gd_contents\",\"scope\":\"10289561463356047098\",\"id\":\"76\",\"type\":\"observable\"},this.plotElem.layout)) : undefined})"],"_downloadImage":["(function (options){return this.Plotly.downloadImage(this.plotElem,options)})"],"_commands":["(function (args){var fn=args.shift(); var elem=this.plotElem; var Plotly=this.Plotly; args.unshift(elem); return Plotly[fn].apply(this,args)})"]},"systemjs_options":null,"mount_callbacks":["function () {\n    var handler = ((function (Plotly,PlotlyWebIO){PlotlyWebIO.init(WebIO); var gd=this.dom.querySelector(\"#plot-aff25175-da99-4143-af88-2b5eb7535ad4\"); this.plotElem=gd; this.Plotly=Plotly; (window.Blink!==undefined) ? (gd.style.width=\"100%\", gd.style.height=\"100vh\", gd.style.marginLeft=\"0%\", gd.style.marginTop=\"0vh\") : undefined; window.onresize=(function (){return Plotly.Plots.resize(gd)}); Plotly.newPlot(gd,[{\"mode\":\"markers\",\"y\":[4.9646997,5.109455,6.135841,5.8832126,4.6237655,4.988805,5.5108237,5.296445,6.168445,5.8728867,4.506696,5.116504,5.43381],\"type\":\"scatter\",\"name\":\"Quelles sont les expressions communes?\",\"customdata\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"text\":[\"Bonjour, comment ça va?\",\"Je m'appelle Marie.\",\"Quel est ton plat préféré?\",\"J'adore voyager dans le monde.\",\"As-tu vu ce film?\",\"Les chats sont mignons.\",\"C'est délicieux!\",\"Tu parles plusieurs langues?\",\"J'aime écouter de la musique.\",\"Quel est ton sport préféré?\",\"Je suis très fatigué.\",\"C'est une bonne idée.\",\"Tu me manques.\"],\"hovertemplate\":\"<b>Topic:<\/b> Quelles sont les expressions communes?<br><b>Text:<\/b> %{text}<extra><\/extra>\",\"x\":[-5.258047,-6.279117,-5.4394016,-6.557244,-4.6042376,-6.994609,-7.0774918,-4.5895214,-6.1670322,-5.066315,-6.548118,-7.4561706,-5.9200873]},{\"mode\":\"markers\",\"y\":[4.144289,4.5024214,4.2770815,3.6553814,3.6649156],\"type\":\"scatter\",\"name\":\"Quel temps fait-il demain?\",\"customdata\":[\"\",\"\",\"\",\"\",\"\"],\"text\":[\"Il fait beau aujourd'hui.\",\"Tu veux sortir ce soir?\",\"Il est tard, tu devrais dormir.\",\"Quel temps fait-il demain?\",\"Il faut rester positif.\"],\"hovertemplate\":\"<b>Topic:<\/b> Quel temps fait-il demain?<br><b>Text:<\/b> %{text}<extra><\/extra>\",\"x\":[-6.1393723,-3.9519272,-5.5597258,-5.4869413,-6.629352]},{\"mode\":\"markers\",\"y\":[3.7639422,3.8556092],\"type\":\"scatter\",\"name\":\"Quelle heure est le rendez-vous ?\",\"customdata\":[\"\",\"\"],\"text\":[\"A quelle heure est le<br>rendez-vous?\",\"Où se trouve la bibliothèque?\"],\"hovertemplate\":\"<b>Topic:<\/b> Quelle heure est le rendez-vous ?<br><b>Text:<\/b> %{text}<extra><\/extra>\",\"x\":[-4.9080296,-4.3250093]}],{\"xaxis\":{\"title\":{\"text\":\"UMAP 1\"}},\"template\":\"plotly_white\",\"margin\":{\"l\":50,\"b\":50,\"r\":50,\"t\":60},\"title\":\"Sujets d'actualité du 2024-02-13\",\"yaxis\":{\"title\":{\"text\":\"UMAP 2\"}}},{\"showLink\":false,\"editable\":false,\"responsive\":true,\"staticPlot\":false,\"scrollZoom\":true}); gd.on(\"plotly_hover\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"hover\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"hover\",\"scope\":\"10289561463356047098\",\"id\":\"71\",\"type\":\"observable\"},filtered_data.out)) : undefined})); gd.on(\"plotly_unhover\",(function (){return WebIO.setval({\"name\":\"hover\",\"scope\":\"10289561463356047098\",\"id\":\"71\",\"type\":\"observable\"},{})})); gd.on(\"plotly_selected\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"selected\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"selected\",\"scope\":\"10289561463356047098\",\"id\":\"72\",\"type\":\"observable\"},filtered_data.out)) : undefined})); gd.on(\"plotly_deselect\",(function (){return WebIO.setval({\"name\":\"selected\",\"scope\":\"10289561463356047098\",\"id\":\"72\",\"type\":\"observable\"},{})})); gd.on(\"plotly_relayout\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"relayout\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"relayout\",\"scope\":\"10289561463356047098\",\"id\":\"74\",\"type\":\"observable\"},filtered_data.out)) : undefined})); return gd.on(\"plotly_click\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"click\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"click\",\"scope\":\"10289561463356047098\",\"id\":\"73\",\"type\":\"observable\"},filtered_data.out)) : undefined}))}));\n    (WebIO.importBlock({\"data\":[{\"name\":\"Plotly\",\"type\":\"js\",\"url\":\"\/assetserver\/46b0af2f03ca323adf531facbdab5be59e805cc6-plotly.min.js\"},{\"name\":null,\"type\":\"js\",\"url\":\"\/assetserver\/103980130ce5b799e931b7ec1b8ad89411b10e20-plotly_webio.bundle.js\"}],\"type\":\"async_block\"})).then((imports) => handler.apply(this, imports));\n}\n"],"observables":{"_toImage":{"sync":false,"id":"78","value":{}},"hover":{"sync":false,"id":"71","value":{}},"selected":{"sync":false,"id":"72","value":{}},"__gd_contents":{"sync":false,"id":"76","value":{}},"click":{"sync":false,"id":"73","value":{}},"image":{"sync":true,"id":"75","value":""},"__get_gd_contents":{"sync":false,"id":"80","value":""},"_downloadImage":{"sync":false,"id":"79","value":{}},"relayout":{"sync":false,"id":"74","value":{}},"_commands":{"sync":false,"id":"77","value":[]}}},"children":[{"props":{"id":"plot-aff25175-da99-4143-af88-2b5eb7535ad4"},"nodeType":"DOM","type":"node","instanceArgs":{"namespace":"html","tag":"div"},"children":[]}]},
+        window,
+    );
+    })()
+    </script>
+</div>
+<p>If you want to understand what <code>create_template</code> does under-the-hood, follow this step by step walkthrough below.</p><p>Note: Templates created with <code>create_template</code> are NOT saved in the <code>templates</code> and they will disappear after your restart REPL. If you want to save it in your project permanently, use <code>PT.save_template</code> as shown in the next example.</p><h2 id="Example-of-creating-a-new-template-the-long-way"><a class="docs-heading-anchor" href="#Example-of-creating-a-new-template-the-long-way">Example of creating a new template - the long way</a><a id="Example-of-creating-a-new-template-the-long-way-1"></a><a class="docs-heading-anchor-permalink" href="#Example-of-creating-a-new-template-the-long-way" title="Permalink"></a></h2><p>We first duplicate the <code>TopicLabelerBasic</code> template to have a starting point and 2 add two new instructions in section &quot;Topic Name Instructions&quot;.</p><pre><code class="language-julia hljs">tpl_custom = [
+    PT.SystemMessage(&quot;&quot;&quot;
+Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.
+
+Your task is create a topic name based on the provided information and sample texts.
+
+**Topic Name Instructions:**
+- A short phrase, ideally 2-5 words.
+- Descriptive of the information provided.
+- Brief and concise.
+- Title Cased.
+- Must be in French.
+- Must be a question.
+&quot;&quot;&quot;),
+    PT.UserMessage(&quot;&quot;&quot;
+    ###Central Text###
+    {{central_text}}
+
+    ###Sample Texts###
+    {{samples}}
+
+    ###Common Words###
+    {{keywords}}
+
+    The most suitable topic name is:&quot;&quot;&quot;)]
+filename = joinpath(pkgdir(LLMTextAnalysis), &quot;templates&quot;,
+    &quot;topic-metadata&quot;,
+    &quot;MyTopicLabels.json&quot;)
+PT.save_template(filename,
+    tpl_custom;
+    version = &quot;1.0&quot;,
+    description = &quot;My custom template for topic labeling. Placeholders: `central_text`, `samples`, `keywords`&quot;)</code></pre><pre><code class="nohighlight hljs">&quot;/Users/simljx/Documents/LLMTextAnalysis/templates/topic-metadata/MyTopicLabels.json&quot;</code></pre><p>Note: The filename of the template is &quot;MyTopicLabels.json&quot;, so the template will be accessible in the code as <code>:MyTopicLabels</code> (symbols signify the use of templates).</p><p>We need to explicitly re-load all templates with <code>load_templates!()</code> to make the new template available for use.</p><pre><code class="language-julia hljs">load_templates!()</code></pre><p>Then to force overwrite the existing labels with the new template, we call <code>build_clusters!</code> with the <code>labeler_kwargs</code> argument.</p><p>Notice that we provide the label_template argument that matches the file name of the template we created</p><pre><code class="language-julia hljs">build_clusters!(
+    index; k = 3, labeler_kwargs = (; label_template = :MyTopicLabels, model = &quot;gpt3t&quot;))
+pl = PlotlyJS.plot(index; k = 3,
+    title = &quot;Sujets d&#39;actualité du 2024-02-13&quot;)</code></pre><div
+    class="webio-mountpoint"
+    data-webio-mountpoint="16864504510432645187"
+>
+    <script>
+    (function(){
+    // Some integrations (namely, IJulia/Jupyter) use an alternate render pathway than
+    // just putting the html on the page. If WebIO isn't defined, then it's pretty likely
+    // that we're in one of those situations and the integration just isn't installed
+    // correctly.
+    if (typeof window.WebIO === "undefined") {
+        document
+            .querySelector('[data-webio-mountpoint="16864504510432645187"]')
+            .innerHTML = (
+                '<div style="padding: 1em; background-color: #f8d6da; border: 1px solid #f5c6cb; font-weight: bold;">' +
+                '<p><strong>WebIO not detected.</strong></p>' +
+                '<p>Please read ' +
+                '<a href="https://juliagizmos.github.io/WebIO.jl/latest/troubleshooting/not-detected/" target="_blank">the troubleshooting guide</a> ' +
+                'for more information on how to resolve this issue.</p>' +
+                '<p><a href="https://juliagizmos.github.io/WebIO.jl/latest/troubleshooting/not-detected/" target="_blank">https://juliagizmos.github.io/WebIO.jl/latest/troubleshooting/not-detected/</a></p>' +
+                '</div>'
+            );
+        return;
+    }
+    WebIO.mount(
+        document.querySelector('[data-webio-mountpoint="16864504510432645187"]'),
+        {"props":{},"nodeType":"Scope","type":"node","instanceArgs":{"imports":{"data":[{"name":"Plotly","type":"js","url":"\/assetserver\/46b0af2f03ca323adf531facbdab5be59e805cc6-plotly.min.js"},{"name":null,"type":"js","url":"\/assetserver\/103980130ce5b799e931b7ec1b8ad89411b10e20-plotly_webio.bundle.js"}],"type":"async_block"},"id":"15895439922540052648","handlers":{"_toImage":["(function (options){return this.Plotly.toImage(this.plotElem,options).then((function (data){return WebIO.setval({\"name\":\"image\",\"scope\":\"15895439922540052648\",\"id\":\"85\",\"type\":\"observable\"},data)}))})"],"__get_gd_contents":["(function (prop){prop==\"data\" ? (WebIO.setval({\"name\":\"__gd_contents\",\"scope\":\"15895439922540052648\",\"id\":\"86\",\"type\":\"observable\"},this.plotElem.data)) : undefined; return prop==\"layout\" ? (WebIO.setval({\"name\":\"__gd_contents\",\"scope\":\"15895439922540052648\",\"id\":\"86\",\"type\":\"observable\"},this.plotElem.layout)) : undefined})"],"_downloadImage":["(function (options){return this.Plotly.downloadImage(this.plotElem,options)})"],"_commands":["(function (args){var fn=args.shift(); var elem=this.plotElem; var Plotly=this.Plotly; args.unshift(elem); return Plotly[fn].apply(this,args)})"]},"systemjs_options":null,"mount_callbacks":["function () {\n    var handler = ((function (Plotly,PlotlyWebIO){PlotlyWebIO.init(WebIO); var gd=this.dom.querySelector(\"#plot-05b89368-459b-43fa-b017-9fb5b7e151c6\"); this.plotElem=gd; this.Plotly=Plotly; (window.Blink!==undefined) ? (gd.style.width=\"100%\", gd.style.height=\"100vh\", gd.style.marginLeft=\"0%\", gd.style.marginTop=\"0vh\") : undefined; window.onresize=(function (){return Plotly.Plots.resize(gd)}); Plotly.newPlot(gd,[{\"mode\":\"markers\",\"y\":[4.9646997,5.109455,6.135841,5.8832126,4.6237655,4.988805,5.5108237,5.296445,6.168445,5.8728867,4.506696,5.116504,5.43381],\"type\":\"scatter\",\"name\":\"Quelle est ta préférence alimentaire?\",\"customdata\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"text\":[\"Bonjour, comment ça va?\",\"Je m'appelle Marie.\",\"Quel est ton plat préféré?\",\"J'adore voyager dans le monde.\",\"As-tu vu ce film?\",\"Les chats sont mignons.\",\"C'est délicieux!\",\"Tu parles plusieurs langues?\",\"J'aime écouter de la musique.\",\"Quel est ton sport préféré?\",\"Je suis très fatigué.\",\"C'est une bonne idée.\",\"Tu me manques.\"],\"hovertemplate\":\"<b>Topic:<\/b> Quelle est ta préférence alimentaire?<br><b>Text:<\/b> %{text}<extra><\/extra>\",\"x\":[-5.258047,-6.279117,-5.4394016,-6.557244,-4.6042376,-6.994609,-7.0774918,-4.5895214,-6.1670322,-5.066315,-6.548118,-7.4561706,-5.9200873]},{\"mode\":\"markers\",\"y\":[4.144289,4.5024214,4.2770815,3.6553814,3.6649156],\"type\":\"scatter\",\"name\":\"Quel temps fait-il aujourd'hui?\",\"customdata\":[\"\",\"\",\"\",\"\",\"\"],\"text\":[\"Il fait beau aujourd'hui.\",\"Tu veux sortir ce soir?\",\"Il est tard, tu devrais dormir.\",\"Quel temps fait-il demain?\",\"Il faut rester positif.\"],\"hovertemplate\":\"<b>Topic:<\/b> Quel temps fait-il aujourd'hui?<br><b>Text:<\/b> %{text}<extra><\/extra>\",\"x\":[-6.1393723,-3.9519272,-5.5597258,-5.4869413,-6.629352]},{\"mode\":\"markers\",\"y\":[3.7639422,3.8556092],\"type\":\"scatter\",\"name\":\"A Quelle Heure est le Rendez-vous?\",\"customdata\":[\"\",\"\"],\"text\":[\"A quelle heure est le<br>rendez-vous?\",\"Où se trouve la bibliothèque?\"],\"hovertemplate\":\"<b>Topic:<\/b> A Quelle Heure est le Rendez-vous?<br><b>Text:<\/b> %{text}<extra><\/extra>\",\"x\":[-4.9080296,-4.3250093]}],{\"xaxis\":{\"title\":{\"text\":\"UMAP 1\"}},\"template\":\"plotly_white\",\"margin\":{\"l\":50,\"b\":50,\"r\":50,\"t\":60},\"title\":\"Sujets d'actualité du 2024-02-13\",\"yaxis\":{\"title\":{\"text\":\"UMAP 2\"}}},{\"showLink\":false,\"editable\":false,\"responsive\":true,\"staticPlot\":false,\"scrollZoom\":true}); gd.on(\"plotly_hover\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"hover\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"hover\",\"scope\":\"15895439922540052648\",\"id\":\"81\",\"type\":\"observable\"},filtered_data.out)) : undefined})); gd.on(\"plotly_unhover\",(function (){return WebIO.setval({\"name\":\"hover\",\"scope\":\"15895439922540052648\",\"id\":\"81\",\"type\":\"observable\"},{})})); gd.on(\"plotly_selected\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"selected\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"selected\",\"scope\":\"15895439922540052648\",\"id\":\"82\",\"type\":\"observable\"},filtered_data.out)) : undefined})); gd.on(\"plotly_deselect\",(function (){return WebIO.setval({\"name\":\"selected\",\"scope\":\"15895439922540052648\",\"id\":\"82\",\"type\":\"observable\"},{})})); gd.on(\"plotly_relayout\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"relayout\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"relayout\",\"scope\":\"15895439922540052648\",\"id\":\"84\",\"type\":\"observable\"},filtered_data.out)) : undefined})); return gd.on(\"plotly_click\",(function (data){var filtered_data=WebIO.PlotlyCommands.filterEventData(gd,data,\"click\"); return !(filtered_data.isnil) ? (WebIO.setval({\"name\":\"click\",\"scope\":\"15895439922540052648\",\"id\":\"83\",\"type\":\"observable\"},filtered_data.out)) : undefined}))}));\n    (WebIO.importBlock({\"data\":[{\"name\":\"Plotly\",\"type\":\"js\",\"url\":\"\/assetserver\/46b0af2f03ca323adf531facbdab5be59e805cc6-plotly.min.js\"},{\"name\":null,\"type\":\"js\",\"url\":\"\/assetserver\/103980130ce5b799e931b7ec1b8ad89411b10e20-plotly_webio.bundle.js\"}],\"type\":\"async_block\"})).then((imports) => handler.apply(this, imports));\n}\n"],"observables":{"_toImage":{"sync":false,"id":"88","value":{}},"hover":{"sync":false,"id":"81","value":{}},"selected":{"sync":false,"id":"82","value":{}},"__gd_contents":{"sync":false,"id":"86","value":{}},"click":{"sync":false,"id":"83","value":{}},"image":{"sync":true,"id":"85","value":""},"__get_gd_contents":{"sync":false,"id":"90","value":""},"_downloadImage":{"sync":false,"id":"89","value":{}},"relayout":{"sync":false,"id":"84","value":{}},"_commands":{"sync":false,"id":"87","value":[]}}},"children":[{"props":{"id":"plot-05b89368-459b-43fa-b017-9fb5b7e151c6"},"nodeType":"DOM","type":"node","instanceArgs":{"namespace":"html","tag":"div"},"children":[]}]},
+        window,
+    );
+    })()
+    </script>
+</div>
+<h2 id="Difference-between-labeler*kwargs-for-build*clusters!andplot"><a class="docs-heading-anchor" href="#Difference-between-labeler*kwargs-for-build*clusters!andplot">Difference between labeler<em>kwargs for `build</em>clusters!<code>and</code>plot`</a><a id="Difference-between-labeler*kwargs-for-build*clusters!andplot-1"></a><a class="docs-heading-anchor-permalink" href="#Difference-between-labeler*kwargs-for-build*clusters!andplot" title="Permalink"></a></h2><p>So when should I use <code>build_clusters!</code> and when should I simply use <code>plot</code>?</p><p>It depends if you want to overwrite any existing topic labels with the provided <code>labeler_kwargs</code> or not:</p><ul><li><code>plot</code> call will only create new labels if you specify <code>k</code> (number of clusters) that <strong>is NOT available yet</strong> (ie, no key available in <code>index.topic_levels</code>).</li><li><code>build_clusters!</code> will always overwrite the existing labels if you specify <code>k</code> (number of clusters).</li></ul><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.3.0 on <span class="colophon-date" title="Wednesday 6 March 2024 10:57">Wednesday 6 March 2024</span>. Using Julia version 1.10.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
