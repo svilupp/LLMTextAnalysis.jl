@@ -106,5 +106,5 @@ topic_levels(index) |> keys
 
 # Whether you have auto-generated topics or custom topics, you can plot them with `plot` by leveraging the keyword argument `topic_level`.
 
-# Let's our clusters:
+# Let's plot our clusters:
 plot(index; topic_level = "MyClusters", title = "My Custom Clusters")
