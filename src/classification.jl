@@ -48,9 +48,43 @@ See also: `score`, `train!`, `train_spectrum`, `train_concept`
 Create a classifier for a set of labeled documents in our index (ie, we know the labels for some documents):
 ```julia
 # Assuming `index` is an existing document index
+
+# Provide the names of the topics and corresponding labeled documents
+labels = ["Improving traffic situation", "Taxes and public funding",
+    "Safety and community", "Other"]
+
+# Let's say we have labeled a few documents - ideally, you should have 5-10 examples for EACH label
+docs_ids = [1, 2674, 4, 17, 23, 69, 2669, 6]
+docs_labels = [1, 1, 2, 2, 3, 3, 4, 4] # what topic each doc belongs to
+
+# Train the classifier
+cls = train_classifier(index, labels; docs_ids, docs_labels)
+
+# Score the documents in the index
+score(index, cls) # or cls(index)
 ```
 
+If you do not have any labeled documents, you can ask an AI model to generate some potential examples for you (`num_samples` per each topic/label).
+It helps to provide label descriptions to improve the quality of generated documents:
 
+```julia
+# Assuming `index` is an existing document index
+
+labels_description = [
+    "Survey responses around infrastructure, improving traffic situation and related",
+    "Decreasing taxes and giving more money to the community",
+    "Survey responses around Homelessness, general safety and community related topics",
+    "Any other topics like environment, education, governance, etc."]
+
+# Train the classifier - it will generate 20 document examples (5 for each label x 4 labels)
+cls = train_classifier(index, labels; labels_description, num_samples=5)
+
+# Get scores for all documents
+scores = score(index, cls)
+
+# Get labels for all documens in the index
+best_labels = score(index, cls; return_labels = true)
+```
 """
 function train_classifier(index::AbstractDocumentIndex,
         labels::AbstractVector{<:AbstractString};
@@ -108,25 +142,25 @@ See also: `train_classifier`, `score`
 
 # Arguments
 - `index::AbstractDocumentIndex`: The document index containing the documents for analysis.
-- `concept::TrainedConcept`: The trained concept object to be refined or retrained.
+- `classifier::TrainedClassifier`: The trained classifier object to be refined or retrained.
 - `verbose::Bool` (optional): If `true`, prints detailed logs during the process. Defaults to `true`.
-- `overwrite::Bool` (optional): If `true`, existing training data in the concept will be overwritten. Defaults to `false`.
-- `rewriter_template::Symbol` (optional): The template used for rewriting statements. Defaults to `:StatementRewriter`.
+- `overwrite::Bool` (optional): If `true`, existing training data in the classifier will be overwritten. Defaults to `false`.
+- `writer_template::Symbol` (optional): The template used for writing synthetic documents. Defaults to `:TextWriterFromLabel`.
 - `lambda::Real` (optional): Regularization parameter for logistic regression. Defaults to 1e-3.
-- `negatives_samples::Int` (optional): The number of negative examples to use for training per each positive sample. Defaults to 1.
+- `num_samples::Int` (optional): The number of examples to to generate for each topic label. Defaults to 5.
 - `aigenerate_kwargs::NamedTuple` (optional): Additional arguments for the `aigenerate` function.
 - `aiembed_kwargs::NamedTuple` (optional): Additional arguments for the `aiembed` function.
 
 # Returns
-- The updated `TrainedConcept` object with refined or new training.
+- The updated `TrainedClassifier` object with refined or new training.
 
 # Example
 ```julia
-# Assuming `index` and `concept` are pre-existing objects
-concept = train!(index, concept, verbose = true, overwrite = true)
+# Assuming `index` and `classifier` are pre-existing objects
+train!(index, classifier, verbose = true, overwrite = true)
 ```
 
-This function allows for continuous improvement and adaptation of a concept model to new data or analysis perspectives. It is particularly useful in dynamic environments where the underlying data or the concept of interest may evolve over time.
+This function allows for continuous improvement and adaptation of a classifier model to new data. 
 """
 function train!(index::AbstractDocumentIndex,
         classifier::TrainedClassifier;
@@ -196,12 +230,6 @@ function train!(index::AbstractDocumentIndex,
     y = classifier.docs_labels
 
     ## TODO: add a cross-validation check
-    ## Benchmark if it's a sensible model
-    ## accuracy = cross_validate_accuracy(X, y; k = 4, verbose = false, lambda)
-    ## verbose && @info "Cross-validated accuracy: $(round(accuracy;digits=2)*100)%"
-    ## if accuracy <= 0.9
-    ##     @warn "Accuracy is too low! (Expected > 90%); revisit the regularization strength (smaller `lambda`), or increase the sample size (`num_samples`) or provide more labels (`docs_ids`, `docs_labels`)!"
-    ## end
 
     classifier.coeffs = fit(model, X, y) |> x -> reshape(x, size(X, 2), :) .|> Float32
     # You can predict the score on the "classifier" of a new document by multiplying coefficients with an embedding
