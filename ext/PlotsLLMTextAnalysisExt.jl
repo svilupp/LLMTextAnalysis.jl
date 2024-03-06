@@ -6,9 +6,11 @@ using LLMTextAnalysis: AbstractDocumentIndex, label, wrap_string
 
 """
     Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
+        topic_level::Union{Nothing, Int, AbstractString} = nothing,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
-        add_hover::Bool = true,  hoverdata = nothing, cluster_kwargs::NamedTuple = NamedTuple(),
+        add_hover::Bool = true, hoverdata = nothing,
+        cluster_kwargs::NamedTuple = NamedTuple(),
         labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
 
 Generates a scatter plot of the document embeddings, colored by topic assignments.
@@ -58,7 +60,7 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
         k
     elseif !isnothing(h)
         h
-    elseif isnothing(topic_level)
+    elseif !isnothing(topic_level)
         topic_level
     else
         ## we don't know the exact `k`, so let pick the highest new one

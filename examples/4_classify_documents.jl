@@ -107,5 +107,9 @@ build_clusters!(index, cls; topic_level = "MyClusters")
 # Check what topic_levels are available
 topic_levels(index) |> keys
 
-# Let's plot it
+# ## Plotting
+
+# Whether you have auto-generated topics or custom topics, you can plot them with `plot` by leveraging the keyword argument `topic_level`.
+
+# Let's our clusters:
 plot!(index; topic_level = "MyClusters", title = "My Custom Clusters")
