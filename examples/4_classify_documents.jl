@@ -1,10 +1,6 @@
 # # Example 4: Classify Documents
-# For this tutorial, we will use the [City of Austin's Community Survey](https://data.austintexas.gov/Health-and-Community-Services/2019-City-of-Austin-Community-Survey/s2py-ceb7).
-#
-# We will pick one open-ended question. Let's say we want to help the mayor to prioritize ideas,
-# so we will lay out the verbatims against the concepts of being "action-oriented" and "forward-looking".
-#
-# You can choose any concepts that you want.
+# Simetimes you need to assign some specific labels to each document. You could use `aiclassify` and process each document separately, but that would be costly.
+# `train_classifier` is a good alternative leveraging the embeddings in your document `index`.
 
 # Necessary imports
 using Downloads, CSV, DataFrames
@@ -13,6 +9,9 @@ using LLMTextAnalysis
 plotlyjs(); # plotlyjs() is the recommended backend for Plots.jl for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
 
 # ## Prepare the Data
+# For this tutorial, we will use the [City of Austin's Community Survey](https://data.austintexas.gov/Health-and-Community-Services/2019-City-of-Austin-Community-Survey/s2py-ceb7).
+#
+# We will pick one open-ended question.
 # Download the survey data
 Downloads.download(
     "https://data.austintexas.gov/api/views/s2py-ceb7/rows.csv?accessType=DOWNLOAD",
@@ -28,15 +27,6 @@ docs = df[!, col] |> skipmissing |> collect;
 # ## Build the Index
 # Index the documents (ie, embed them)
 index = build_index(docs)
-
-## Temporary for efficiency:
-using Serialization
-fn = "examples/_index.jls"
-if isfile(fn)
-    index = deserialize(fn)
-else
-    serialize(fn, index)
-end
 
 # ## Classification
 # Sometimes you need to assign some specific labels to each document.
@@ -64,22 +54,26 @@ docs_labels = [1, 1, 2, 2, 3, 3, 4, 4]
 
 # Train the classifier
 cls = train_classifier(index, labels; docs_ids, docs_labels)
-# Output: TrainedClassifier("Classifier with 4 labels", Docs: 8, Embeddings: OK, Coeffs: OK)
 
 # Get scores for all documents
 scores = score(index, cls)
+scores[1:3, :]
 # Note: Watch out for scores around `1/number_of_labels` - it means the classifier is not very confident about the classification
 
 # Best label for each document
 label_ids = argmax(scores, dims = 2) |> vec |> x -> map(i -> i[2], x)
 best_labels = cls.labels[label_ids]
+best_labels[1:3]
 
 # Or do it in one line with `return_labels=true`
 best_labels = score(index, cls; return_labels = true)
+best_labels[1:3]
 
 # ### Classification Without Labeled Examples
 # When we don't have any examples, we can ask an AI model to generate some potential examples for us.
 # It might be less precise, but it can save us a lot of time.
+#
+# Adding label descriptions will improve the quality of generated documents:
 labels_description = [
     "Survey responses around infrastructure, improving traffic situation and related",
     "Decreasing taxes and giving more money to the community",
@@ -88,18 +82,19 @@ labels_description = [
 
 # Train the classifier - it will generate 20 document examples (5 for each label x 4 labels)
 cls = train_classifier(index, labels; labels_description)
-# Output: TrainedClassifier("Classifier with 4 labels", Docs: 8, Embeddings: OK, Coeffs: OK)
 
 # Get scores for all documents
 scores = score(index, cls)
+scores[1:3, :]
 
 # Best label for each document
 best_labels = score(index, cls; return_labels = true)
+best_labels[1:3]
 
 # ## Adding Custom Topic Level to the Index
 
 # Let's say we want to add a custom topic level to the index.
-# We can do it by providing the `cls` to the function `build_clusters!`.
+# We can do it by providing the trained classifier `cls` to the function `build_clusters!`.
 
 build_clusters!(index, cls; topic_level = "MyClusters")
 # Note: If not `topic_level` is provided, it will default to "Custom_1".
@@ -112,4 +107,4 @@ topic_levels(index) |> keys
 # Whether you have auto-generated topics or custom topics, you can plot them with `plot` by leveraging the keyword argument `topic_level`.
 
 # Let's our clusters:
-plot!(index; topic_level = "MyClusters", title = "My Custom Clusters")
+plot(index; topic_level = "MyClusters", title = "My Custom Clusters")

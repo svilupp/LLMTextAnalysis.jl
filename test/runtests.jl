@@ -16,5 +16,6 @@ end
     include("preparation.jl")
     include("topic_modelling.jl")
     include("concept_labeling.jl")
+    include("classification.jl")
     include("plotting.jl")
 end

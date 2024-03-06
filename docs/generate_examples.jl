@@ -7,10 +7,14 @@ example_files = [
 #     "..",
 #     "examples",
 #     "1_topics_in_city_of_austin_community_survey.jl")
+## joinpath(@__DIR__,
+##     "..",
+##     "examples",
+##     "3_customize_topic_labels.jl"),
     joinpath(@__DIR__,
     "..",
     "examples",
-    "2_concept_labeling_in_city_of_austin_community_survey.jl")
+    "4_classify_documents.jl")
 ]
 output_dir = joinpath(@__DIR__, "src", "examples")
 

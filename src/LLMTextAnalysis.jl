@@ -15,7 +15,8 @@ export load_templates!
 # export nunique, sigmoid, softmax
 include("utils.jl")
 
-export DocIndex, TopicMetadata, TrainedConcept, TrainedSpectrum, topic_levels
+export DocIndex, TopicMetadata, TrainedConcept, TrainedSpectrum, TrainedClassifier,
+       topic_levels
 include("types.jl")
 
 export build_index, prepare_plot!

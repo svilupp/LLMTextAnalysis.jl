@@ -1,14 +1,12 @@
 # # Example 3: Customize Topic Labels
 # The focus of this tutorial is how to customize the topic labels in the plot.
 # 
-# For this tutorial, we will use the [City of Austin's Community Survey](https://data.austintexas.gov/Health-and-Community-Services/2019-City-of-Austin-Community-Survey/s2py-ceb7).
-# We will pick one open-ended question and extract the main themes from the answers.
-
 # Necessary imports
 using Downloads, CSV, DataFrames
 using Plots
 using LLMTextAnalysis
-##PLOTLYJS##
+using PromptingTools
+const PT = PromptingTools # for the templating functionality
 plotlyjs(); # recommended backend for interactivity, install with `using Pkg; Pkg.add("PlotlyJS")`
 
 # ## Customizing Topic Labels
@@ -162,7 +160,7 @@ Your task is create a topic name based on the provided information and sample te
     {{keywords}}
 
     The most suitable topic name is:""")]
-filename = joinpath("templates",
+filename = joinpath(pkgdir(LLMTextAnalysis), "templates",
     "topic-metadata",
     "MyTopicLabels.json")
 PT.save_template(filename,
