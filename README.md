@@ -145,6 +145,79 @@ index.docs[first(sortperm(scores, rev = true), 5)]
 > [!TIP]
 > Remember to `serialize` your trained concepts and spectra to the disk for future use. This will save you time and money when you need to restart the REPL session.
 
+### Classify Documents
+
+Maybe you have done some fuzzy discovery at different levels of `k` (4,10,20,50). Now you have an idea of what you want, but neither of these auto-generated topic levels provide that - what should you do? 
+
+`train_classifier` is the answer. It allows you to create a set of specific labels, one of which will be assigned to each document. 
+
+Difference against standard standard multi-class classification:
+- It operates on "embeddings" of the documents, capturing the semantic essence of the text, while being much more cost-efficient than running `aiclassify` on each document.
+- It can be unsupervised, so you don't need to provide any labels for the documents (but you can if you want to). If there are no documents provided, the LLM engine will generate its own training data.
+
+
+```julia
+index = "..." # re-use the index from the previous example
+# Let's create a few labels inspired by the automatic topic detection
+labels = ["Improving traffic situation", "Taxes and public funding",
+    "Safety and community", "Other"]
+  
+# Adding label descriptions will improve the quality of generated documents:
+labels_description = [
+    "Survey responses around infrastructure, improving traffic situation and related",
+    "Decreasing taxes and giving more money to the community",
+    "Survey responses around Homelessness, general safety and community related topics",
+    "Any other topics like environment, education, governance, etc."]
+
+# Train the classifier - it will generate 20 document examples (5 for each label x 4 labels). Ideally, you should aim for 10-20 examples per label.
+cls = train_classifier(index, labels; labels_description)
+
+# Get scores for all documents
+scores = score(index, cls)
+
+# Best label for each document
+best_labels = score(index, cls; return_labels = true)
+```
+
+If you want to plot these, you can create a new `topic_level` in your index and then plot it as usual.
+
+```julia
+# Notice we provide our classifier `cls` as the second argument
+build_clusters!(index, cls; topic_level = "MyClusters")
+
+# Let's plot our clusters:
+plot(index; topic_level = "MyClusters", title = "My Custom Clusters")
+```
+
+> [!TIP]
+>  Be careful that if all the scores are similar, it means that the classifier is not very confident about the classification. Ie, look out for scores around `1/number_of_labels`.
+
+> [!TIP]
+> When you provide a vector of labels, try to add some "catch all" category like "Other" or "Not sure" to catch the documents that don't fit any of the provided labels.
+
+### Create Custom Topic Levels
+
+Both `build_clusters!` and `plot` expose a keyword argument to create a new named `topic_level` in the `index`.
+
+```julia
+build_clusters!(index, cls; topic_level = "MyClusters")
+# Note: If not `topic_level` is provided, it will default to "Custom_1".
+
+# Check what topic_levels are available
+topic_levels(index) |> keys
+```
+
+You can create your custom topic levels without a classifier by directly providing the document `assignments` (ie, the cluster number for each document).
+
+```julia
+build_clusters!(index, assignments; topic_level = "MyClusters2", labels=["Label 1", "Label 2", "Label 3",...])
+```
+
+Then you can simply plot them via
+```julia
+plot(index; topic_level = "MyClusters2", title = "My Custom Clusters #2")
+```
+
 ### Advanced Features and Best Practices
 This section covers more advanced use cases and best practices for optimal results.
 
