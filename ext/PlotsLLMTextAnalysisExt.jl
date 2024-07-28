@@ -9,6 +9,7 @@ using LLMTextAnalysis: AbstractDocumentIndex, label, wrap_string
         topic_level::Union{Nothing, Int, AbstractString} = nothing,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         cluster_kwargs::NamedTuple = NamedTuple(),
         labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
@@ -21,6 +22,7 @@ Generates a scatter plot of the document embeddings, colored by topic assignment
 - `k`: The number of clusters to build. If not provided, the highest new level of clustering will be used.
 - `h`: The height at which to cut the dendrogram. Defaults to nothing.
 - `text_width`: The width of the text in the hover tooltip. If the document exceeds this width, it will be wrapped on new lines.
+- `text_length_max`: The maximum length of the text to display in the hover tooltip. If the document exceeds this length, it will be truncated.
 - `add_hover`: Whether to add a hover tooltip to the plot.
 - `hoverdata`: A Tables.jl-compatible object (eg, DataFrame) with the hover data to add to each tooltip.
   Assumes that rows correspond to the individual documents in `index.docs`. Defaults to nothing.
@@ -40,6 +42,7 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
         topic_level::Union{Nothing, Int, AbstractString} = nothing,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         cluster_kwargs::NamedTuple = NamedTuple(),
         labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
@@ -98,7 +101,7 @@ function Plots.plot(index::AbstractDocumentIndex; verbose::Bool = true,
             end
             ["""
 <b>Topic</b>: $(topic.label)<br>
-<b>Text</b>: $(wrap_string(index.docs[docs_idx[i]], text_width; newline="<br>"))<br>
+<b>Text</b>: $(wrap_string(first(index.docs[docs_idx[i]],text_length_max), text_width; newline="<br>"))<br>
 $(extras[i])
 """
              for i in eachindex(docs_idx, extras)]
@@ -109,7 +112,8 @@ $(extras[i])
             plot_data[2, docs_idx];
             hover,
             label = topic.label,
-            legend = :outertopright)
+            legend = :outertopright,
+            leftmargin = 10Plots.mm)
     end
     pl = plot(pl; plot_kwargs...)
     return pl
@@ -120,6 +124,7 @@ end
         concept1::Union{TrainedConcept, TrainedSpectrum},
         concept2::Union{TrainedConcept, TrainedSpectrum}; verbose::Bool = true,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         plot_kwargs...)
 
@@ -132,6 +137,7 @@ It positions the documents in the index according to their scores for the two co
 - `concept1`: The first concept/spectrum (x-axis position).
 - `concept2`: The second concept/spectrum (y-axis position).
 - `text_width`: The width of the text in the hover tooltip. If the document exceeds this width, it will be wrapped on new lines.
+- `text_length_max`: The maximum length of the text to display in the hover tooltip. If the document exceeds this length, it will be truncated.
 - `add_hover`: Whether to add a hover tooltip to the plot.
 - `hoverdata`: A Tables.jl-compatible object (eg, DataFrame) with the hover data to add to each tooltip.
   Assumes that rows correspond to the individual documents in `index.docs`. Defaults to nothing.
@@ -155,6 +161,7 @@ function Plots.plot(index::AbstractDocumentIndex,
         concept2::Union{TrainedConcept, TrainedSpectrum};
         verbose::Bool = true,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         plot_kwargs...)
     @assert isnothing(hoverdata)||(Tables.istable(hoverdata) &&
@@ -176,7 +183,7 @@ function Plots.plot(index::AbstractDocumentIndex,
             end
         end
         ["""
-    <b>Text</b>: \"$(wrap_string(index.docs[i],text_width; newline="<br>"))\"<br>
+    <b>Text</b>: \"$(wrap_string(first(index.docs[i],text_length_max),text_width; newline="<br>"))\"<br>
     <b>Score #1</b>: $(round(Int,100*scores1[i]))%<br>
     <b>Score #2</b>: $(round(Int,100*scores2[i]))%<br>
     $(extras[i])
@@ -193,6 +200,7 @@ function Plots.plot(index::AbstractDocumentIndex,
         ylabel = label(concept2),
         yformatter = x -> "$(round(Int, 100x))%",
         xformatter = x -> "$(round(Int, 100x))%",
+        leftmargin = 10Plots.mm,
         hover,
         plot_kwargs...)
     return pl

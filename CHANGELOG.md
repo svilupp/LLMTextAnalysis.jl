@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.6.0]
+
+### Added
+- Added a new template `TopicLabelerQuestionsWithContext` to generate topic labels for questions in a given context (eg, chatbot inputs).
+
+### Updated
+- Updated to use `PromptingTools` 0.43.0.
+- That implicitly changes the default chat model to `gpt-4o-mini`.
+- Minor updates to labeling templates to ensure that the labels are plain text, no markdown or code.
+
+### Fixed
+- Fixed a bug where `wrap_string` would not properly handle large words with a lot of Unicode characters.
+
 ## [0.5.0]
 
 ### Added

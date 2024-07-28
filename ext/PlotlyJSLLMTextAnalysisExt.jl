@@ -9,10 +9,10 @@ using LLMTextAnalysis: AbstractDocumentIndex, label, wrap_string
         topic_level::Union{Nothing, Int, AbstractString} = nothing,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         cluster_kwargs::NamedTuple = NamedTuple(),
         labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
-
 
 Generates a scatter plot of the document embeddings, colored by topic assignments.
 
@@ -22,6 +22,7 @@ Generates a scatter plot of the document embeddings, colored by topic assignment
 - `k`: The number of clusters to build. If not provided, the highest new level of clustering will be used.
 - `h`: The height at which to cut the dendrogram. Defaults to nothing.
 - `text_width`: The width of the text in the hover tooltip. If the document exceeds this width, it will be wrapped on new lines.
+- `text_length_max`: The maximum length of the text to display in the hover tooltip. If the document exceeds this length, it will be truncated.
 - `add_hover`: Whether to add a hover tooltip to the plot.
 - `hoverdata`: A Tables.jl-compatible object (eg, DataFrame) with the hover data to add to each tooltip.
   Assumes that rows correspond to the individual documents in `index.docs`. Defaults to nothing.
@@ -41,6 +42,7 @@ function PlotlyJS.plot(index::AbstractDocumentIndex; verbose::Bool = true,
         topic_level::Union{Nothing, Int, AbstractString} = nothing,
         k::Union{Int, Nothing} = nothing, h::Union{Float64, Nothing} = nothing,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         cluster_kwargs::NamedTuple = NamedTuple(),
         labeler_kwargs::NamedTuple = NamedTuple(), plot_kwargs...)
@@ -103,7 +105,8 @@ function PlotlyJS.plot(index::AbstractDocumentIndex; verbose::Bool = true,
             x = plot_data[1, docs_idx],
             y = plot_data[2, docs_idx],
             name = topic.label,
-            text = wrap_string.(index.docs[topic.docs_idx], text_width; newline = "<br>"),
+            text = first.(index.docs[topic.docs_idx], text_length_max) |>
+                   x -> wrap_string.(x, text_width; newline = "<br>"),
             hovertemplate,
             customdata,
             mode = "markers")
@@ -125,6 +128,7 @@ end
         concept1::Union{TrainedConcept, TrainedSpectrum},
         concept2::Union{TrainedConcept, TrainedSpectrum}; verbose::Bool = true,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         plot_kwargs...)
 
@@ -137,6 +141,7 @@ It positions the documents in the index according to their scores for the two co
 - `concept1`: The first concept/spectrum (x-axis position).
 - `concept2`: The second concept/spectrum (y-axis position).
 - `text_width`: The width of the text in the hover tooltip. If the document exceeds this width, it will be wrapped on new lines.
+- `text_length_max`: The maximum length of the text to display in the hover tooltip. If the document exceeds this length, it will be truncated.
 - `add_hover`: Whether to add a hover tooltip to the plot.
 - `hoverdata`: A Tables.jl-compatible object (eg, DataFrame) with the hover data to add to each tooltip.
   Assumes that rows correspond to the individual documents in `index.docs`. Defaults to nothing.
@@ -161,6 +166,7 @@ function PlotlyJS.plot(index::AbstractDocumentIndex,
         concept2::Union{TrainedConcept, TrainedSpectrum};
         verbose::Bool = true,
         text_width::Int = 30,
+        text_length_max::Int = 256,
         add_hover::Bool = true, hoverdata = nothing,
         plot_kwargs...)
     @assert isnothing(hoverdata)||(Tables.istable(hoverdata) &&
@@ -189,7 +195,8 @@ function PlotlyJS.plot(index::AbstractDocumentIndex,
     end
 
     trace = PlotlyJS.scatter(; x = scores1, y = scores2,
-        text = wrap_string.(index.docs, text_width; newline = "<br>"),
+        text = first.(index.docs, text_length_max) |>
+               x -> wrap_string.(x, text_width; newline = "<br>"),
         hovertemplate,
         customdata,
         mode = "markers")

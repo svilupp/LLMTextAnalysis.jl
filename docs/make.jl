@@ -24,10 +24,10 @@ makedocs(;
             "Explore Topics in Your Documents" => "examples/1_topics_in_city_of_austin_community_survey.md",
             "Look for specific Concept/Spectrum" => "examples/2_concept_labeling_in_city_of_austin_community_survey.md",
             "Customize Topic Labels" => "examples/3_customize_topic_labels.md",
-            "Classify Your Documents" => "examples/4_classify_documents.md",
+            "Classify Your Documents" => "examples/4_classify_documents.md"
         ],
         "F.A.Q." => "FAQ.md",
-        "References" => "api_reference.md",
+        "References" => "api_reference.md"
     ])
 
 deploydocs(;

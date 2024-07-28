@@ -33,7 +33,8 @@ end
 @testset "build_index" begin
     # Basic Functionality: Test with simple input documents
     # corresponds to OpenAI API v1
-    response1 = Dict(:data => [Dict(:embedding => ones(128)), Dict(:embedding => ones(128))],
+    response1 = Dict(
+        :data => [Dict(:embedding => ones(128)), Dict(:embedding => ones(128))],
         :usage => Dict(:total_tokens => 2, :prompt_tokens => 2, :completion_tokens => 0))
     PT.register_model!(;
         name = "mock-emb",
@@ -56,7 +57,8 @@ end
     docs = ["Document 1 text", "Document 2 text"]
     index = build_index(docs, verbose = true, aiembed_kwargs = (; model = "mock-emb"))
     @test_logs (:info, r"Embedding 2 documents") (:info, r"Done embedding.") (:info,
-        r"Computing pairwise distances") (:info, r"Extracting keywords") match_mode=:any build_index(docs,
+        r"Computing pairwise distances") (:info, r"Extracting keywords") match_mode=:any build_index(
+        docs,
         verbose = true,
         aiembed_kwargs = (; model = "mock-emb"))
 
