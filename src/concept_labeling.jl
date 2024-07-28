@@ -80,7 +80,7 @@ function cross_validate_accuracy(X::AbstractMatrix,
         y_pred = vec(X_test * theta)
 
         correct = sum((y_pred[i] >= 0.0) == (y_test[i] .>= 0.0)
-                      for i in eachindex(y_pred, y_test))
+        for i in eachindex(y_pred, y_test))
         lock(lk) do
             accuracies[i] = correct / length(y_test)
         end
@@ -159,7 +159,7 @@ function train_concept(index::AbstractDocumentIndex,
         rewriter_template::Symbol = :StatementRewriter,
         lambda::Real = 1e-3, negatives_samples::Int = 1,
         aigenerate_kwargs::NamedTuple = NamedTuple(),
-        aiembed_kwargs::NamedTuple = NamedTuple(),)
+        aiembed_kwargs::NamedTuple = NamedTuple())
     #
     source_doc_ids = shuffle(1:length(index.docs)) |> x -> first(x, num_samples)
     concept = TrainedConcept(; index_id = index.id,
@@ -217,7 +217,7 @@ function train!(index::AbstractDocumentIndex,
         rewriter_template::Symbol = :StatementRewriter,
         lambda::Real = 1e-3, negatives_samples::Int = 1,
         aigenerate_kwargs::NamedTuple = NamedTuple(),
-        aiembed_kwargs::NamedTuple = NamedTuple(),)
+        aiembed_kwargs::NamedTuple = NamedTuple())
     @assert !isempty(concept.concept) "Concept must be non-empty! (Provided: $(concept.concept))"
 
     @assert index.id==concept.index_id "Index ID mismatch! (Provided Index: $(index.id), Expected: $(concept.index_id))"
@@ -375,7 +375,7 @@ function train_spectrum(index::AbstractDocumentIndex,
         rewriter_template::Symbol = :StatementRewriter,
         lambda::Real = 1e-5,
         aigenerate_kwargs::NamedTuple = NamedTuple(),
-        aiembed_kwargs::NamedTuple = NamedTuple(),)
+        aiembed_kwargs::NamedTuple = NamedTuple())
     #
     source_doc_ids = shuffle(1:length(index.docs)) |> x -> first(x, num_samples)
     spectrum = TrainedSpectrum(; index_id = index.id,
@@ -430,7 +430,7 @@ function train!(index::AbstractDocumentIndex,
         rewriter_template::Symbol = :StatementRewriter,
         lambda::Real = 1e-5,
         aigenerate_kwargs::NamedTuple = NamedTuple(),
-        aiembed_kwargs::NamedTuple = NamedTuple(),)
+        aiembed_kwargs::NamedTuple = NamedTuple())
     @assert !isempty(spectrum.spectrum[1]) "Spectrum side #1 must be non-empty! (Provided: $(spectrum.spectrum[1]))"
     @assert !isempty(spectrum.spectrum[2]) "Spectrum side #2 must be non-empty! (Provided: $(spectrum.spectrum[2]))"
     @assert spectrum.spectrum[1]!=spectrum.spectrum[2] "Spectrum sides must be different! (Provided: $(spectrum.spectrum[1]), $(spectrum.spectrum[2]))"
@@ -486,8 +486,9 @@ function train!(index::AbstractDocumentIndex,
         end
         # We remove the embedding of the original source documents 
         # to retain only the "direction" of the lens/spectrum we chose
-        embeddings = hcat(spectrum1_embeddings .-
-                          @view(index.embeddings[:, source_doc_ids]),
+        embeddings = hcat(
+            spectrum1_embeddings .-
+            @view(index.embeddings[:, source_doc_ids]),
             spectrum2_embeddings .- @view(index.embeddings[:, source_doc_ids])) .|> Float32
         spectrum.embeddings = embeddings
     end

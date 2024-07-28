@@ -11,7 +11,8 @@ plotlyjs(); # recommended backend for interactivity, install with `using Pkg; Pk
 
 # ## Prepare the data
 # Download the survey data
-Downloads.download("https://data.austintexas.gov/api/views/s2py-ceb7/rows.csv?accessType=DOWNLOAD",
+Downloads.download(
+    "https://data.austintexas.gov/api/views/s2py-ceb7/rows.csv?accessType=DOWNLOAD",
     joinpath(@__DIR__, "cityofaustin.csv"));
 
 # Read the survey data into a DataFrame

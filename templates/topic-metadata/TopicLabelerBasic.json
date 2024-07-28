@@ -2,12 +2,12 @@
     {
         "content": "Template Metadata",
         "description": "Labels a given topic/theme in 2-5 words based on the provided central text, samples and keywords. Placeholders: `central_text`, `samples`, `keywords`",
-        "version": "1.1",
+        "version": "1.2",
         "source": "",
         "_type": "metadatamessage"
     },
     {
-        "content": "Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.\n\nYour task is create a topic name based on the provided information and sample texts.\n\n**Topic Name Instructions:**\n- A short phrase, ideally 2-5 words.\n- Descriptive of the information provided.\n- Brief and concise.\n- Title Cased.\n\n",
+        "content": "Act as a world-class behavioural researcher, unbiased and trained to surface key underlying themes.\n\nYour task is create a topic name based on the provided information and sample texts.\n\n**Topic Name Instructions:**\n- A short phrase, ideally 2-5 words.\n- Descriptive of the information provided.\n- Brief and concise.\n- Title Cased.\n- Must be a plain text, no markdown or code.\n\n",
         "variables": [],
         "_type": "systemmessage"
     },

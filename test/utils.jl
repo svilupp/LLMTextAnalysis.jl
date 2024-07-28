@@ -37,4 +37,9 @@ end
     @test_broken maximum(length.(split(output, "\n"))) <= 20 #bug, it adds back the separator
     str = "This function will wrap words into lines"
     @test wrap_string(str, length(str)) == str
+    # Unicode testing
+    long_unicode_sentence = "Überraschenderweise ℕ𝕖𝕦𝕣𝕠𝕥𝕣𝕒𝕟𝕤𝕞𝕚𝕥𝕥𝕖𝕣 ℂ𝕙𝕣𝕪𝕤𝕒𝕟𝕥𝕙𝕖𝕞𝕦𝕞𝕤 𝕊𝕪𝕟𝕔𝕙𝕣𝕠𝕡𝕙𝕒𝕤𝕠𝕥𝕣𝕠𝕟 Ξ𝕩𝕥𝕣𝕒𝕠𝕣𝕕𝕚𝕟𝕒𝕚𝕣𝕖"
+    wrapped = wrap_string(long_unicode_sentence, 20)
+    @test all(length(line) ≤ 20 for line in split(wrapped, "\n"))
+    @test join(split(wrapped, "\n"), "") == replace(long_unicode_sentence, " " => "")
 end
