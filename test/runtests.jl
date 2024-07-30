@@ -2,6 +2,7 @@ using LLMTextAnalysis
 using PromptingTools
 const PT = PromptingTools
 using Test, Random, LinearAlgebra
+using AbstractTrees
 import Plots, PlotlyJS, Tables
 Plots.plotlyjs();
 using Aqua

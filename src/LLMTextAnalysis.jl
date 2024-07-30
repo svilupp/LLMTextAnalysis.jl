@@ -5,9 +5,12 @@ using UMAP, Clustering, Distances
 using SparseArrays: sparse
 using LinearAlgebra: normalize
 using PromptingTools
+using PromptingTools: wrap_string
 using Random: shuffle
 using Statistics: mean
 using MLJLinearModels, Tables
+using AbstractTrees
+using AbstractTrees: print_tree
 const PT = PromptingTools
 
 using PromptingTools: load_templates!
@@ -33,6 +36,9 @@ include("classification.jl")
 export build_clusters!
 # export build_topic
 include("topic_modelling.jl")
+
+export print_tree, topic_tree
+include("topic_trees.jl")
 
 function __init__()
     ## Load extra templates
