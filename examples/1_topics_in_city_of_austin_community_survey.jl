@@ -65,3 +65,13 @@ pl4
 # Also, by single-clicking / double-clicking on the topics in the legend, you can hide/show the topics.
 #
 # Note: You can save the plot as an HTML file and share it with others while keeping the interactivity.
+
+# ## Tip 4: Show the Topic Tree
+#
+# You can also use the topic tree to explore the hierarchy of topics across multiple levels.
+#
+# Let's display the topic tree for levels k=4, k=10, and k=20.
+# ```julia
+# root = topic_tree(index, [4, 10, 20])
+# print_tree(root)
+# ```

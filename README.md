@@ -93,6 +93,25 @@ pl = plot(index; title = "City of Austin Community Survey Themes")
 
 Run the full example via `examples/1_topics_in_city_of_austin_community_survey.jl`.
 
+You can easily show the topic tree for multiple levels of k, ie, see how different topics nest into each other.
+
+Let's ensure we have several topic levels, eg, k=4, k=10, k=20.
+```julia
+build_clusters!(index; k=4)
+build_clusters!(index; k=10)
+build_clusters!(index; k=20)
+```
+
+Let's produce the topic tree:
+```julia
+root = topic_tree(index, [4, 10, 20])
+print_tree(root)
+```
+
+
+
+Now you know where most of the documents are!
+
 ### Identify and Score Documents on Arbitrary Concepts / Spectrum
 
 Sometimes you know what you're looking for, but it's hard to define the exact keywords. For example, you might want to identify documents that are "action-oriented" or "pessimistic" or "forward-looking".
