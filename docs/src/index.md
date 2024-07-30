@@ -58,6 +58,61 @@ plot(index)
 
 For some visual examples, jump to [Example 1: Topics in the City of Austin Community Survey](@ref).
 
+You can easily show the topic tree for multiple levels of k, ie, see how the different topics roll up.
+
+Let's ensure we have several topic levels, eg, k=4, k=10, k=20.
+```julia
+build_clusters!(index; k=4)
+build_clusters!(index; k=10)
+build_clusters!(index; k=20)
+```
+
+Let's produce the topic tree:
+```julia
+root = topic_tree(index, [4, 10, 20])
+print_tree(root)
+```
+
+```plaintext
+"All Documents (N: 2933, Share: 100.0%, Level: root, Topic ID: 0)"
+├─ "Austin Housing and Infrastructure Issues (N: 1754, Share: 59.8%, Level: 4, Topic ID: 1)"
+│  ├─ "Homelessness In Austin (N: 894, Share: 30.48%, Level: 10, Topic ID: 3)"
+│  │  ├─ "Traffic Improvement Solutions (N: 619, Share: 21.1%, Level: 20, Topic ID: 2)"
+│  │  ├─ "Affordable Housing Crisis (N: 288, Share: 9.82%, Level: 20, Topic ID: 3)"
+│  │  ├─ "City Improvement Priorities (N: 234, Share: 7.98%, Level: 20, Topic ID: 7)"
+│  │  ├─ "Urban Infrastructure Development (N: 160, Share: 5.46%, Level: 20, Topic ID: 1)"
+│  │  ├─ "Government Accountability Issues (N: 65, Share: 2.22%, Level: 20, Topic ID: 17)"
+│  │  ├─ "Community Support Initiatives (N: 53, Share: 1.81%, Level: 20, Topic ID: 14)"
+│  │  ├─ "Education Improvement Initiatives (N: 52, Share: 1.77%, Level: 20, Topic ID: 16)"
+│  │  ├─ "Affordable Housing and Childcare (N: 18, Share: 0.61%, Level: 20, Topic ID: 10)"
+│  │  └─ "Traffic, Immigration, And Taxes (N: 17, Share: 0.58%, Level: 20, Topic ID: 12)"
+│  ├─ "Affordable Housing Concerns (N: 591, Share: 20.15%, Level: 10, Topic ID: 2)"
+│  │  ├─ "Affordable Living in Austin (N: 543, Share: 18.51%, Level: 20, Topic ID: 8)"
+│  │  ├─ "Addressing Homelessness in Austin (N: 333, Share: 11.35%, Level: 20, Topic ID: 5)"
+│  │  ├─ "Soccer Stadium Controversy (N: 8, Share: 0.27%, Level: 20, Topic ID: 19)"
+│  │  └─ "Community Engagement Challenges (N: 7, Share: 0.24%, Level: 20, Topic ID: 20)"
+│  ├─ "City Safety and Governance (N: 234, Share: 7.98%, Level: 10, Topic ID: 5)"
+│  │  └─ "Growth and Sustainability (N: 73, Share: 2.49%, Level: 20, Topic ID: 9)"
+│  ├─ "Quality Over Growth (N: 168, Share: 5.73%, Level: 10, Topic ID: 6)"
+│  │  └─ "Property Tax Concerns (N: 303, Share: 10.33%, Level: 20, Topic ID: 4)"
+│  ├─ "Education Affordability Crisis (N: 52, Share: 1.77%, Level: 10, Topic ID: 10)"
+│  └─ "City Resource Management (N: 49, Share: 1.67%, Level: 10, Topic ID: 7)"
+├─ "Housing Affordability Concerns (N: 591, Share: 20.15%, Level: 4, Topic ID: 2)"
+├─ "Core City Services Prioritization (N: 420, Share: 14.32%, Level: 4, Topic ID: 3)"
+│  ├─ "Urban Mobility Improvement (N: 787, Share: 26.83%, Level: 10, Topic ID: 1)"
+│  │  ├─ "City Resource Allocation (N: 49, Share: 1.67%, Level: 20, Topic ID: 11)"
+│  │  ├─ "Equitable Leadership Decisions (N: 30, Share: 1.02%, Level: 20, Topic ID: 13)"
+│  │  ├─ "Fairness and Accountability (N: 28, Share: 0.95%, Level: 20, Topic ID: 15)"
+│  │  └─ "Appreciating Efforts And Service (N: 18, Share: 0.61%, Level: 20, Topic ID: 18)"
+│  └─ "Community Concerns and Compliance (N: 24, Share: 0.82%, Level: 10, Topic ID: 8)"
+└─ "Quality Of Life Concerns (N: 168, Share: 5.73%, Level: 4, Topic ID: 4)"
+   ├─ "Equitable Community Support (N: 81, Share: 2.76%, Level: 10, Topic ID: 9)"
+   └─ "Community Engagement Strategies (N: 53, Share: 1.81%, Level: 10, Topic ID: 4)"
+      └─ "Community Engagement and Transparency (N: 35, Share: 1.19%, Level: 20, Topic ID: 6)"
+```
+
+Now you know what the key topics are across all levels!
+
 ### Installation and Setup
 Install LLMTextAnalysis.jl via a direct link (it's not yet registered).
 
