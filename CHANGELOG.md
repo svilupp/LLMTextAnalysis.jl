@@ -14,9 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added a new template `TopicLabelerQuestionsWithContext` to generate topic labels for questions in a given context (eg, chatbot inputs).
+- Added a new function `topic_tree` to generate a topic tree for a given topic level (display with `print_tree`).
 
 ### Updated
-- Updated to use `PromptingTools` 0.43.0.
+- Updated to use `PromptingTools` 0.44.0.
 - That implicitly changes the default chat model to `gpt-4o-mini`.
 - Minor updates to labeling templates to ensure that the labels are plain text, no markdown or code.
 - Re-formatted code to SciML style guide.
