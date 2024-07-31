@@ -4,6 +4,7 @@ authors = ["J S <49557684+svilupp@users.noreply.github.com> and contributors"]
 version = "0.6.0"
 
 [deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
 Languages = "8ef0a80b-9436-5d2c-a485-80b904378c43"
@@ -29,6 +30,7 @@ PlotlyJSLLMTextAnalysisExt = ["PlotlyJS"]
 PlotsLLMTextAnalysisExt = ["Plots"]
 
 [compat]
+AbstractTrees = "0.4"
 Aqua = "0.7"
 Clustering = "0.15"
 Distances = "0.10"
@@ -41,7 +43,7 @@ MLJLinearModels = "0.10"
 PlotlyJS = "0.18"
 Plots = "1.35 - 1.40"
 PrecompileTools = "1"
-PromptingTools = "0.43"
+PromptingTools = "0.44"
 Snowball = "0.1.1"
 SparseArrays = "<0.0.1, 1"
 Statistics = "<0.0.1, 1"
