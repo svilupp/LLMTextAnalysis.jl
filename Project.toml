@@ -1,7 +1,7 @@
 name = "LLMTextAnalysis"
 uuid = "a88142f3-a164-49e9-925a-9408902b6922"
 authors = ["J S <49557684+svilupp@users.noreply.github.com> and contributors"]
-version = "0.6.0"
+version = "0.7.0"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -31,7 +31,7 @@ PlotsLLMTextAnalysisExt = ["Plots"]
 
 [compat]
 AbstractTrees = "0.4"
-Aqua = "0.7"
+Aqua = "0.7, 0.8"
 Clustering = "0.15"
 Distances = "0.10"
 HTTP = "1"
@@ -43,7 +43,8 @@ MLJLinearModels = "0.10"
 PlotlyJS = "0.18"
 Plots = "1.35 - 1.40"
 PrecompileTools = "1"
-PromptingTools = "0.44"
+PromptingTools = "0.44 - 0.64"
+Random = "1"
 Snowball = "0.1.1"
 SparseArrays = "<0.0.1, 1"
 Statistics = "<0.0.1, 1"
