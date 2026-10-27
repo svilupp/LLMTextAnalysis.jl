@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Increased compatibility with `PromptingTools` upto 0.95, so that it can be used together with RAGTools.jl.
 
 ### Fixed
 
